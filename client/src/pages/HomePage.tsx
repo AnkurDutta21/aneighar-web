@@ -1,138 +1,206 @@
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Search, MapPin, Building, ShieldCheck, ArrowRight, Zap, Star } from 'lucide-react'
+import { Search, MapPin, ShieldCheck, Zap, Building2, ArrowRight, Star, Users, TrendingUp } from 'lucide-react'
 import MainLayout from '@/layouts/MainLayout'
 
+const CITIES = ['Mumbai', 'Delhi', 'Pune', 'Bangalore', 'Hyderabad', 'Chennai']
+
+const STATS = [
+  { value: '2,400+', label: 'Verified PGs', icon: ShieldCheck, color: 'text-emerald-400' },
+  { value: '18K+', label: 'Happy Students', icon: Users, color: 'text-blue-400' },
+  { value: '95%', label: 'Satisfaction Rate', icon: Star, color: 'text-amber-400' },
+  { value: '40+', label: 'Cities Covered', icon: TrendingUp, color: 'text-purple-400' },
+]
+
+const FEATURES = [
+  {
+    icon: Search, color: 'from-blue-500 to-cyan-400',
+    title: 'Smart Filtering',
+    desc: 'Filter by amenities, room type, gender preference, and price range to find exactly what you need.'
+  },
+  {
+    icon: ShieldCheck, color: 'from-emerald-500 to-teal-400',
+    title: 'Verified Listings',
+    desc: 'Every property and owner is background-verified for your complete safety and peace of mind.'
+  },
+  {
+    icon: Zap, color: 'from-amber-500 to-orange-400',
+    title: 'Zero Brokerage',
+    desc: 'Connect directly with landlords. No hidden fees, no middlemen, no commissions ever.'
+  },
+]
+
 const HomePage: React.FC = () => {
-  const [searchQuery, setSearchQuery] = React.useState('')
+  const [query, setQuery] = React.useState('')
   const navigate = useNavigate()
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    if (searchQuery.trim()) {
-      navigate(`/listings?city=${encodeURIComponent(searchQuery)}`)
-    } else {
-      navigate('/listings')
-    }
+    navigate(query.trim() ? `/listings?city=${encodeURIComponent(query)}` : '/listings')
   }
 
   return (
     <MainLayout>
-      <div className="flex flex-col gap-24 pb-16 fade-in">
-        
-        {/* Hero Section */}
-        <section className="relative pt-12 lg:pt-24 flex flex-col items-center text-center">
-          {/* Deep blue glowing orb behind text */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/15 rounded-full blur-[120px] pointer-events-none" />
-          
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary/30 bg-primary/10 text-primary-light text-sm font-medium mb-8 backdrop-blur-md">
-            <Star size={16} className="fill-primary-light" />
-            <span className="tracking-wide uppercase text-xs">Premium Student Housing</span>
+      <div className="flex flex-col gap-28 pb-16">
+
+        {/* ── Hero ─────────────────────────────────────────── */}
+        <section className="relative pt-10 lg:pt-20 flex flex-col items-center text-center">
+          {/* Hero glow */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-gradient-glow pointer-events-none" />
+
+          {/* Badge */}
+          <div className="animate-fade-up opacity-0 inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-primary/25 text-primary-light text-xs font-semibold uppercase tracking-widest mb-8">
+            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+            Premium Student Housing Platform
           </div>
 
-          <h1 className="text-display max-w-4xl text-transparent bg-clip-text bg-gradient-to-br from-white via-blue-100 to-primary-light mb-6">
-            Find Your Perfect Home <br className="hidden md:block" /> Away From Home
+          {/* Headline */}
+          <h1 className="text-display max-w-4xl text-transparent bg-clip-text bg-gradient-to-br from-slate-100 via-blue-100 to-primary-light mb-6 animate-fade-up opacity-0 delay-100">
+            Find Your Perfect
+            <br className="hidden sm:block" />
+            <span className="gradient-text"> PG in Minutes</span>
           </h1>
-          
-          <p className="text-gray-400 text-lg md:text-xl max-w-2xl mb-12 leading-relaxed">
-            Discover verified, safe, and premium PG accommodations tailored for students and young professionals. Zero broker fees.
+
+          <p className="text-text-secondary text-lg md:text-xl max-w-2xl mb-12 leading-relaxed animate-fade-up opacity-0 delay-200">
+            Browse thousands of verified paying-guest accommodations. Filter by city, budget, and amenities — zero broker fees.
           </p>
 
-          <form onSubmit={handleSearch} className="w-full max-w-2xl relative z-10 group">
-            <div className="relative flex items-center bg-bg-card border border-white/10 rounded-full p-2 pl-6 shadow-2xl transition-all duration-300 focus-within:border-primary/50 focus-within:ring-2 ring-primary/20">
-              <MapPin className="text-gray-400 group-focus-within:text-primary transition-colors" size={24} />
+          {/* Search bar */}
+          <form
+            onSubmit={handleSearch}
+            className="w-full max-w-2xl animate-fade-up opacity-0 delay-300"
+          >
+            <div className="relative flex items-center glass border border-white/10 rounded-2xl p-2 shadow-2xl shadow-black/30 focus-within:border-primary/40 focus-within:shadow-primary/10 transition-all duration-300">
+              <div className="pl-3 pr-2 shrink-0">
+                <MapPin size={22} className="text-text-muted" />
+              </div>
               <input
                 type="text"
-                placeholder="Search by city (e.g., Pune, Mumbai, Delhi)"
-                className="flex-1 bg-transparent border-none outline-none px-4 text-white placeholder:text-gray-500 text-lg w-full"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by city — Pune, Mumbai, Delhi..."
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                className="flex-1 bg-transparent outline-none text-white placeholder:text-text-muted text-base py-2 px-2"
               />
-              <button type="submit" className="bg-[var(--background-image-gradient-primary)] text-white px-8 py-3.5 rounded-full font-semibold shadow-lg hover:brightness-110 transition-all active:scale-95 flex items-center gap-2">
-                <Search size={20} />
-                <span className="hidden sm:inline">Search PGs</span>
+              <button
+                type="submit"
+                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-primary text-white font-semibold shadow-lg shadow-primary-glow/30 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 shrink-0"
+              >
+                <Search size={18} />
+                <span className="hidden sm:inline">Search</span>
               </button>
             </div>
           </form>
 
-          <div className="mt-12 flex flex-wrap justify-center items-center gap-x-8 gap-y-4 text-sm text-gray-400 font-medium">
-            <span className="flex items-center gap-2"><ShieldCheck size={18} className="text-green-400" /> 100% Verified Listings</span>
-            <span className="flex items-center gap-2"><Zap size={18} className="text-yellow-400" /> Instant Booking</span>
-            <span className="flex items-center gap-2"><Building size={18} className="text-primary-light" /> 500+ Premium Properties</span>
+          {/* Quick city chips */}
+          <div className="flex flex-wrap justify-center gap-2 mt-5 animate-fade-up opacity-0 delay-400">
+            <span className="text-sm text-text-muted">Popular:</span>
+            {CITIES.map(city => (
+              <button
+                key={city}
+                onClick={() => navigate(`/listings?city=${city}`)}
+                className="px-3 py-1 rounded-full text-xs font-medium glass border border-white/10 text-text-secondary hover:text-white hover:border-primary/30 transition-all duration-200"
+              >
+                {city}
+              </button>
+            ))}
           </div>
         </section>
 
-        {/* Features / Steps */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-          {[
-            {
-              icon: Search,
-              title: 'Smart Search',
-              desc: 'Filter by amenities, distance to college, rent, and rules to find the exact match for your lifestyle.',
-              color: 'text-blue-400',
-              bg: 'bg-blue-400/10'
-            },
-            {
-              icon: ShieldCheck,
-              title: 'Verified Owners',
-              desc: 'Every listing and landlord goes through strict background verification to ensure your safety.',
-              color: 'text-green-400',
-              bg: 'bg-green-400/10'
-            },
-            {
-              icon: Zap,
-              title: 'Hassle-free Move-in',
-              desc: 'Connect directly with landlords, schedule visits, and move in without paying hefty brokerages.',
-              color: 'text-yellow-400',
-              bg: 'bg-yellow-400/10'
-            }
-          ].map((feat, i) => (
-            <div key={i} className="glass-card p-8 group">
-              <div className={`w-14 h-14 ${feat.bg} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                <feat.icon size={28} className={feat.color} />
+        {/* ── Stats ────────────────────────────────────────── */}
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+          {STATS.map((stat, i) => (
+            <div
+              key={i}
+              className={`glass-card p-6 text-center animate-fade-up opacity-0`}
+              style={{ animationDelay: `${i * 100}ms` }}
+            >
+              <div className={`flex justify-center mb-3 ${stat.color}`}>
+                <stat.icon size={26} />
               </div>
-              <h3 className="text-xl font-bold text-white mb-3">{feat.title}</h3>
-              <p className="text-gray-400 leading-relaxed">{feat.desc}</p>
+              <div className="text-2xl md:text-3xl font-bold text-white mb-1">{stat.value}</div>
+              <div className="text-xs md:text-sm text-text-secondary">{stat.label}</div>
             </div>
           ))}
         </section>
 
-        {/* CTA Section */}
-        <section className="relative overflow-hidden rounded-[2rem] border border-primary/20 bg-gradient-to-br from-bg-card to-[#061225] p-8 md:p-16 flex flex-col md:flex-row items-center justify-between gap-12 shadow-2xl">
-          <div className="absolute right-0 top-0 w-96 h-96 bg-primary/20 blur-[100px] rounded-full translate-x-1/3 -translate-y-1/3 pointer-events-none" />
-          
-          <div className="relative z-10 max-w-xl">
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Are you a PG Owner?</h2>
-            <p className="text-gray-300 text-lg mb-8 leading-relaxed">
-              List your property on Anei Ghar and connect with thousands of verified students looking for accommodation in your area.
+        {/* ── Features ─────────────────────────────────────── */}
+        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {FEATURES.map((feat, i) => (
+            <div
+              key={i}
+              className={`glass-card-interactive p-8 group animate-fade-up opacity-0`}
+              style={{ animationDelay: `${i * 120}ms` }}
+            >
+              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feat.color} p-0.5 mb-6`}>
+                <div className="w-full h-full bg-bg-card rounded-[14px] flex items-center justify-center">
+                  <feat.icon size={24} className="text-white" />
+                </div>
+              </div>
+              <h3 className="text-lg font-bold text-white mb-3 group-hover:text-primary-light transition-colors">
+                {feat.title}
+              </h3>
+              <p className="text-text-secondary leading-relaxed text-sm">{feat.desc}</p>
+            </div>
+          ))}
+        </section>
+
+        {/* ── Owner CTA ─────────────────────────────────────── */}
+        <section className="relative overflow-hidden rounded-3xl border border-primary/15 p-8 md:p-14 flex flex-col lg:flex-row items-center justify-between gap-10 animate-fade-up opacity-0">
+          {/* background */}
+          <div className="absolute inset-0 bg-gradient-card pointer-events-none" />
+          <div className="absolute -right-20 -top-20 w-80 h-80 bg-primary/15 rounded-full blur-[80px] pointer-events-none" />
+          <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none" />
+
+          <div className="relative z-10 text-center lg:text-left max-w-xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/15 border border-primary/25 text-primary-light text-xs font-semibold uppercase tracking-wider mb-6">
+              <Building2 size={14} />
+              For Property Owners
+            </div>
+            <h2 className="text-h1 text-white mb-4">
+              List Your PG &amp;<br />Reach Thousands
+            </h2>
+            <p className="text-text-secondary text-lg mb-8 leading-relaxed">
+              Join 2,400+ verified property owners on Anei Ghar. Get real inquiries from verified students — completely free.
             </p>
-            <div className="flex flex-wrap gap-4">
-              <Link to="/register" className="px-8 py-3.5 rounded-full bg-white text-bg font-bold shadow-xl hover:bg-gray-100 transition-colors flex items-center gap-2">
-                List Property <ArrowRight size={20} />
+            <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+              <Link
+                to="/register"
+                className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-bg bg-white hover:bg-slate-100 shadow-xl transition-all hover:-translate-y-0.5 no-underline"
+              >
+                Start Listing Free <ArrowRight size={18} />
               </Link>
-              <Link to="/login" className="px-8 py-3.5 rounded-full bg-white/10 text-white font-medium border border-white/20 hover:bg-white/20 transition-colors flex items-center gap-2">
+              <Link
+                to="/login"
+                className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-white glass border border-white/15 hover:border-white/30 hover:bg-white/5 transition-all no-underline"
+              >
                 Owner Login
               </Link>
             </div>
           </div>
-          
-          <div className="relative z-10 hidden lg:block">
-            <div className="glass-card p-6 w-72 rotate-3 hover:rotate-0 transition-transform duration-500 border-primary/30 bg-bg-card/80">
-              <div className="flex justify-between items-center mb-6">
-                <div className="w-12 h-12 bg-green-500/20 text-green-400 rounded-xl flex items-center justify-center">
-                  <ShieldCheck size={24} />
+
+          {/* Decorative card mockup */}
+          <div className="relative z-10 hidden lg:block shrink-0 animate-float">
+            <div className="glass-card p-6 w-72 border-primary/20 shadow-2xl shadow-black/40">
+              <div className="flex items-center justify-between mb-5">
+                <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Live Dashboard</span>
+                <span className="flex items-center gap-1 text-xs text-emerald-400 font-semibold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Live
+                </span>
+              </div>
+              {[
+                { label: 'Views Today', val: '142', trend: '+12%' },
+                { label: 'New Inquiries', val: '8', trend: '+3' },
+                { label: 'Saved by Students', val: '24', trend: '+5' },
+              ].map((row, i) => (
+                <div key={i} className={`flex items-center justify-between py-3 ${i < 2 ? 'border-b border-white/6' : ''}`}>
+                  <span className="text-sm text-text-secondary">{row.label}</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white font-bold">{row.val}</span>
+                    <span className="text-xs text-emerald-400">{row.trend}</span>
+                  </div>
                 </div>
-                <span className="text-xs font-bold px-3 py-1 bg-primary/20 text-primary-light rounded-full">Owner Dashboard</span>
-              </div>
-              <div className="space-y-3">
-                <div className="h-2.5 bg-white/10 rounded-full w-full" />
-                <div className="h-2.5 bg-white/10 rounded-full w-4/5" />
-                <div className="h-2.5 bg-white/10 rounded-full w-5/6" />
-              </div>
-              <div className="mt-8 pt-4 border-t border-white/10 flex justify-between items-center">
-                <div className="text-sm text-gray-400">Total Views</div>
-                <div className="text-lg font-bold text-white">1,204</div>
-              </div>
+              ))}
             </div>
           </div>
         </section>

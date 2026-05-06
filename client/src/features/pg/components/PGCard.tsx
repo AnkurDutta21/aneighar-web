@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { MapPin, Users, Bed, Bookmark, BookmarkCheck, Wifi, AirVent, Car } from 'lucide-react'
+import { MapPin, Bed, Users, Bookmark, BookmarkCheck, Wifi, AirVent, Car, Utensils, Dumbbell } from 'lucide-react'
 import type { PGListing } from '@/features/pg/pg.types'
 import { useAuthStore } from '@/stores/auth.store'
 import { useToggleSave } from '@/features/pg/hooks/usePG'
@@ -11,15 +11,17 @@ interface PGCardProps {
 }
 
 const amenityIcons: Record<string, React.ReactNode> = {
-  wifi: <Wifi size={13} />,
-  ac: <AirVent size={13} />,
-  parking: <Car size={13} />,
+  wifi: <Wifi size={12} />,
+  ac: <AirVent size={12} />,
+  parking: <Car size={12} />,
+  meals: <Utensils size={12} />,
+  gym: <Dumbbell size={12} />,
 }
 
-const genderLabel: Record<string, { label: string; cls: string }> = {
-  male: { label: 'Boys', cls: 'badge-blue' },
-  female: { label: 'Girls', cls: 'badge-red' },
-  any: { label: 'Co-ed', cls: 'badge-green' },
+const genderConfig: Record<string, { label: string; cls: string }> = {
+  male:   { label: 'Boys Only', cls: 'bg-blue-500/15 text-blue-300 border-blue-500/20' },
+  female: { label: 'Girls Only', cls: 'bg-pink-500/15 text-pink-300 border-pink-500/20' },
+  any:    { label: 'Co-ed', cls: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/20' },
 }
 
 const PGCard: React.FC<PGCardProps> = ({ pg, isSaved = false }) => {
@@ -33,93 +35,106 @@ const PGCard: React.FC<PGCardProps> = ({ pg, isSaved = false }) => {
     toggleSave.mutate(pg._id)
   }
 
-  const gender = genderLabel[pg.genderPreference]
-  const firstImage = pg.images[0]?.url || '/placeholder-pg.jpg'
-  const displayAmenities = pg.amenities.slice(0, 3)
+  const gender = genderConfig[pg.genderPreference]
+  const firstImage = pg.images[0]?.url || ''
+  const shownAmenities = pg.amenities.filter(a => amenityIcons[a]).slice(0, 4)
 
   return (
-    <Link to={`/listings/${pg._id}`} className="block no-underline" id={`pg-card-${pg._id}`}>
-      <article className="pg-card fade-in">
+    <Link to={`/listings/${pg._id}`} className="block no-underline group">
+      <article className="glass-card-interactive overflow-hidden h-full flex flex-col">
+
         {/* Image */}
         <div className="relative overflow-hidden" style={{ aspectRatio: '16/10' }}>
           <img
             src={firstImage}
             alt={pg.title}
-            className="pg-card-image"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
-            onError={(e) => {
-              (e.target as HTMLImageElement).src = `https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600&q=80`
+            onError={e => {
+              (e.target as HTMLImageElement).src =
+                `https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600&q=70`
             }}
           />
-          {/* Gradient overlay */}
-          <div className="absolute inset-0" style={{
-            background: 'linear-gradient(to top, rgba(0,0,0,0.6) 0%, transparent 60%)'
-          }} />
 
-          {/* Availability Badge */}
-          <div className="absolute top-3 left-3">
-            <span className={`badge ${pg.isAvailable ? 'badge-green' : 'badge-red'}`}>
-              {pg.isAvailable ? `${pg.availableRooms} Available` : 'Full'}
+          {/* Gradient overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+          {/* Top badges */}
+          <div className="absolute top-3 left-3 flex gap-2">
+            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border backdrop-blur-sm ${
+              pg.isAvailable
+                ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/25'
+                : 'bg-red-500/20 text-red-300 border-red-500/25'
+            }`}>
+              {pg.isAvailable ? `${pg.availableRooms} Rooms Free` : 'Full'}
             </span>
           </div>
 
-          {/* Save Button */}
+          {/* Save button */}
           {isAuthenticated && user?.role === 'student' && (
             <button
-              id={`save-btn-${pg._id}`}
               onClick={handleSave}
               disabled={toggleSave.isPending}
-              className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/40 backdrop-blur flex items-center justify-center transition-all hover:bg-black/60 hover:scale-110"
+              className={`absolute top-3 right-3 w-8 h-8 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95 ${
+                isSaved
+                  ? 'bg-primary/80 shadow-lg shadow-primary-glow/30'
+                  : 'bg-black/40 hover:bg-black/60'
+              }`}
               aria-label={isSaved ? 'Remove from saved' : 'Save listing'}
             >
               {isSaved
-                ? <BookmarkCheck size={15} className="text-primary" />
+                ? <BookmarkCheck size={15} className="text-white" />
                 : <Bookmark size={15} className="text-white" />
               }
             </button>
           )}
 
-          {/* Price overlay */}
+          {/* Price bottom left */}
           <div className="absolute bottom-3 left-3">
-            <span className="text-white font-semibold text-lg">
+            <div className="text-white font-bold text-xl leading-none">
               ₹{pg.rent.toLocaleString()}
-              <span className="text-xs font-normal text-white/70">/mo</span>
+              <span className="text-white/60 font-normal text-sm ml-1">/mo</span>
+            </div>
+          </div>
+
+          {/* Gender badge bottom right */}
+          <div className="absolute bottom-3 right-3">
+            <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium border backdrop-blur-sm ${gender.cls}`}>
+              {gender.label}
             </span>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-4">
-          <div className="flex items-start justify-between gap-2 mb-2">
-            <h3 className="text-white font-semibold text-base leading-tight line-clamp-1 flex-1">
-              {pg.title}
-            </h3>
-            <span className={`badge ${gender.cls} shrink-0`}>{gender.label}</span>
+        <div className="p-4 flex flex-col gap-2.5 flex-1">
+          <h3 className="text-white font-semibold text-base leading-snug line-clamp-1 group-hover:text-primary-light transition-colors duration-200">
+            {pg.title}
+          </h3>
+
+          <div className="flex items-center gap-1.5 text-text-secondary text-xs">
+            <MapPin size={12} className="shrink-0" />
+            <span className="line-clamp-1">{pg.location.address}, {pg.location.city}</span>
           </div>
 
-          <div className="flex items-center gap-1 mb-3" style={{ color: 'var(--color-text-secondary)' }}>
-            <MapPin size={13} />
-            <span className="text-xs line-clamp-1">
-              {pg.location.address}, {pg.location.city}
+          {/* Details row */}
+          <div className="flex items-center gap-3 text-xs text-text-muted mt-auto pt-2 border-t border-white/6">
+            <span className="flex items-center gap-1 capitalize">
+              <Bed size={12} /> {pg.roomType}
             </span>
-          </div>
-
-          <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--color-text-muted)' }}>
-            <div className="flex items-center gap-1">
-              <Bed size={13} />
-              <span className="capitalize">{pg.roomType}</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Users size={13} />
-              <span>{pg.totalRooms} rooms</span>
-            </div>
-            {displayAmenities.map((a) => (
-              <div key={a} className="flex items-center gap-1" title={a}>
-                {amenityIcons[a] || null}
+            <span className="flex items-center gap-1">
+              <Users size={12} /> {pg.totalRooms} rooms
+            </span>
+            {shownAmenities.length > 0 && (
+              <div className="flex items-center gap-1 ml-auto">
+                {shownAmenities.map(a => (
+                  <span key={a} title={a} className="text-text-muted hover:text-primary-light transition-colors">
+                    {amenityIcons[a]}
+                  </span>
+                ))}
+                {pg.amenities.length > 4 && (
+                  <span className="text-text-muted">+{pg.amenities.length - 4}</span>
+                )}
               </div>
-            ))}
-            {pg.amenities.length > 3 && (
-              <span>+{pg.amenities.length - 3}</span>
             )}
           </div>
         </div>

@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { User, Mail, Lock, Building, GraduationCap, ArrowRight, Eye, EyeOff } from 'lucide-react'
+import { User, Mail, Lock, GraduationCap, Building2, ArrowRight, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useRegister } from '@/features/auth/hooks/useAuth'
 
 const registerSchema = z.object({
@@ -12,8 +12,21 @@ const registerSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
   role: z.enum(['student', 'owner']),
 })
-
 type RegisterInput = z.infer<typeof registerSchema>
+
+const InputField: React.FC<{
+  icon: React.ReactNode
+  error?: string
+  children: React.ReactNode
+}> = ({ icon, error, children }) => (
+  <div className="flex flex-col gap-1.5">
+    <div className="relative">
+      <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none">{icon}</div>
+      {children}
+    </div>
+    {error && <p className="text-xs text-error ml-1">{error}</p>}
+  </div>
+)
 
 const RegisterPage: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false)
@@ -22,7 +35,7 @@ const RegisterPage: React.FC = () => {
 
   const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<RegisterInput>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { role: 'student' }
+    defaultValues: { role: 'student' },
   })
 
   const selectedRole = watch('role')
@@ -30,138 +43,156 @@ const RegisterPage: React.FC = () => {
   const onSubmit = (data: RegisterInput) => {
     registerMutation.mutate(data, {
       onSuccess: (res) => {
-        if (res.data.user.role === 'owner') navigate('/dashboard')
-        else navigate('/listings')
+        navigate(res.data.user.role === 'owner' ? '/dashboard' : '/listings')
       },
     })
   }
 
-  return (
-    <div className="min-h-screen bg-bg relative flex items-center justify-center p-4 overflow-hidden fade-in">
-      <div className="absolute inset-0 bg-[var(--background-image-gradient-subtle)] pointer-events-none" />
-      
-      {/* Background Orbs */}
-      <div className="absolute top-1/4 right-1/4 w-96 h-96 bg-primary/15 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-1/4 left-1/4 w-96 h-96 bg-primary-deep/20 rounded-full blur-[120px] pointer-events-none" />
+  const inputClass = (hasError: boolean) =>
+    `w-full bg-white/4 border rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-text-muted text-sm focus:outline-none focus:ring-2 transition-all duration-200 ${
+      hasError
+        ? 'border-error/50 focus:ring-error/20'
+        : 'border-white/10 focus:border-primary/50 focus:ring-primary/15'
+    }`
 
-      <Link to="/" className="absolute top-8 left-8 text-white font-bold text-xl tracking-tight no-underline z-20 flex items-center gap-2">
-        <div className="w-8 h-8 bg-gradient-to-br from-[#1E90FF] to-[#0B3D91] rounded-lg flex items-center justify-center">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2L3 9v13h18V9L12 2z" fill="white"/></svg>
+  return (
+    <div className="min-h-screen bg-bg relative flex items-center justify-center p-4 overflow-hidden">
+      {/* Ambient orbs */}
+      <div className="absolute -top-64 -right-64 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[120px] pointer-events-none animate-orb" />
+      <div className="absolute -bottom-64 -left-64 w-[500px] h-[500px] bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none animate-orb delay-400" />
+
+      {/* Grid */}
+      <div className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: 'linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px)',
+          backgroundSize: '60px 60px',
+        }}
+      />
+
+      {/* Back to home */}
+      <Link to="/" className="absolute top-6 left-6 z-20 flex items-center gap-2.5 no-underline group">
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-primary rounded-xl blur-sm opacity-60 group-hover:opacity-100 transition-opacity" />
+          <div className="relative w-9 h-9 bg-gradient-primary rounded-xl flex items-center justify-center">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L3 9v13h6v-6h6v6h6V9L12 2z" fill="white" />
+            </svg>
+          </div>
         </div>
-        <span>anei<span className="text-primary-light">ghar</span></span>
+        <span className="font-bold text-xl tracking-tight text-white">
+          anei<span className="gradient-text">ghar</span>
+        </span>
       </Link>
 
-      <div className="glass-card w-full max-w-md p-8 relative z-10 mt-16 md:mt-0">
+      {/* Card */}
+      <div className="glass-card w-full max-w-md p-8 sm:p-10 relative z-10 animate-scale-in border-white/10 shadow-2xl shadow-black/40 my-8">
+
+        {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-white mb-2">Create an Account</h1>
-          <p className="text-gray-400">Join Anei Ghar to find or list premium PGs</p>
+          <h1 className="text-h2 text-white mb-2">Create Your Account</h1>
+          <p className="text-text-secondary">Join thousands finding great PGs</p>
         </div>
 
+        {/* Role selector */}
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          {([
+            { val: 'student', label: 'I\'m a Student', sub: 'Looking for PG', icon: GraduationCap, grad: 'from-blue-500 to-cyan-400' },
+            { val: 'owner', label: 'I\'m an Owner', sub: 'Listing property', icon: Building2, grad: 'from-emerald-500 to-teal-400' },
+          ] as const).map(({ val, label, sub, icon: Icon, grad }) => (
+            <button
+              key={val}
+              type="button"
+              onClick={() => setValue('role', val)}
+              className={`flex flex-col items-center gap-2 p-4 rounded-xl border-2 transition-all duration-200 ${
+                selectedRole === val
+                  ? 'border-primary bg-primary/12 shadow-md shadow-primary-glow/15'
+                  : 'border-white/8 bg-white/2 text-text-secondary hover:border-white/15 hover:bg-white/4'
+              }`}
+            >
+              <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${grad} flex items-center justify-center`}>
+                <Icon size={20} className="text-white" />
+              </div>
+              <div>
+                <div className={`text-sm font-semibold ${selectedRole === val ? 'text-white' : 'text-text-secondary'}`}>{label}</div>
+                <div className="text-xs text-text-muted">{sub}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {/* Error */}
         {registerMutation.error && (
-          <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm mb-6 flex items-center justify-center text-center">
-            {registerMutation.error.response?.data?.message || 'Registration failed. Please try again.'}
+          <div className="flex items-center gap-2 bg-error/10 border border-error/20 text-red-400 px-4 py-3 rounded-xl text-sm mb-5">
+            <span>⚠</span>
+            {(registerMutation.error as any).response?.data?.message || 'Registration failed. Please try again.'}
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          {/* Role Selector */}
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-300 ml-1">I am a</label>
-            <div className="grid grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={() => setValue('role', 'student')}
-                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${
-                  selectedRole === 'student'
-                    ? 'border-primary bg-primary/10 text-white shadow-lg shadow-primary/10'
-                    : 'border-white/10 bg-black/20 text-gray-400 hover:border-white/20 hover:text-gray-300'
-                }`}
-              >
-                <GraduationCap size={28} className="mb-2" />
-                <span className="font-semibold">Student</span>
-                <span className="text-xs opacity-70 mt-1">Looking for PG</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setValue('role', 'owner')}
-                className={`flex flex-col items-center justify-center p-4 rounded-xl border-2 transition-all ${
-                  selectedRole === 'owner'
-                    ? 'border-primary bg-primary/10 text-white shadow-lg shadow-primary/10'
-                    : 'border-white/10 bg-black/20 text-gray-400 hover:border-white/20 hover:text-gray-300'
-                }`}
-              >
-                <Building size={28} className="mb-2" />
-                <span className="font-semibold">Owner</span>
-                <span className="text-xs opacity-70 mt-1">Listing a PG</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-300 ml-1">Full Name</label>
-            <div className="relative">
-              <User className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-text-secondary">Full Name</label>
+            <InputField icon={<User size={16} />} error={errors.name?.message}>
               <input
                 type="text"
                 placeholder="John Doe"
-                className={`w-full bg-black/20 border ${errors.name ? 'border-red-500/50' : 'border-white/10'} rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all`}
+                className={inputClass(!!errors.name)}
                 {...register('name')}
               />
-            </div>
-            {errors.name && <p className="text-red-400 text-xs ml-1 mt-1">{errors.name.message}</p>}
+            </InputField>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-300 ml-1">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-text-secondary">Email Address</label>
+            <InputField icon={<Mail size={16} />} error={errors.email?.message}>
               <input
                 type="email"
                 placeholder="you@example.com"
-                className={`w-full bg-black/20 border ${errors.email ? 'border-red-500/50' : 'border-white/10'} rounded-xl py-3 pl-10 pr-4 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all`}
+                className={inputClass(!!errors.email)}
                 {...register('email')}
               />
-            </div>
-            {errors.email && <p className="text-red-400 text-xs ml-1 mt-1">{errors.email.message}</p>}
+            </InputField>
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-gray-300 ml-1">Password</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-medium text-text-secondary">Password</label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
+              <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" />
               <input
                 type={showPassword ? 'text' : 'password'}
-                placeholder="••••••••"
-                className={`w-full bg-black/20 border ${errors.password ? 'border-red-500/50' : 'border-white/10'} rounded-xl py-3 pl-10 pr-12 text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all`}
+                placeholder="At least 6 characters"
+                className={`${inputClass(!!errors.password)} pr-11`}
                 {...register('password')}
               />
               <button
                 type="button"
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-text-muted hover:text-white transition-colors"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
-            {errors.password && <p className="text-red-400 text-xs ml-1 mt-1">{errors.password.message}</p>}
+            {errors.password && <p className="text-xs text-error ml-1">{errors.password.message}</p>}
           </div>
 
           <button
             type="submit"
             disabled={registerMutation.isPending}
-            className="w-full bg-[var(--background-image-gradient-primary)] text-white font-semibold py-3.5 rounded-xl shadow-lg hover:shadow-primary/25 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 mt-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="flex items-center justify-center gap-2 w-full py-3.5 rounded-xl font-semibold text-white bg-gradient-primary shadow-lg shadow-primary-glow/25 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0 mt-1"
           >
-            {registerMutation.isPending ? 'Creating account...' : 'Create Account'}
-            {!registerMutation.isPending && <ArrowRight size={18} />}
+            {registerMutation.isPending ? (
+              <><Loader2 size={18} className="animate-spin" /> Creating account...</>
+            ) : (
+              <>Create Account <ArrowRight size={18} /></>
+            )}
           </button>
         </form>
 
-        <div className="mt-8 text-center text-sm text-gray-400">
+        <p className="mt-7 text-center text-sm text-text-secondary">
           Already have an account?{' '}
-          <Link to="/login" className="text-primary-light hover:text-white font-medium transition-colors">
-            Log in
+          <Link to="/login" className="text-primary-light font-semibold hover:text-white transition-colors">
+            Sign in
           </Link>
-        </div>
+        </p>
       </div>
     </div>
   )

@@ -1,130 +1,142 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Plus, Edit, Trash2, Eye, Bookmark, MessageSquare, Loader2, AlertTriangle } from 'lucide-react'
+import { Plus, Eye, Edit2, Trash2, Home, AlertTriangle, Loader2 } from 'lucide-react'
 import MainLayout from '@/layouts/MainLayout'
-import { useOwnerListings, useDeletePG } from '@/features/pg/hooks/usePG'
-import type { PGListing } from '@/features/pg/pg.types'
+import { useMyListings, useDeletePG } from '@/features/pg/hooks/usePG'
 
 const MyListingsPage: React.FC = () => {
-  const { data: listings = [], isLoading } = useOwnerListings()
+  const { data: listings, isLoading, isError } = useMyListings()
   const deletePG = useDeletePG()
-  const [confirmDelete, setConfirmDelete] = React.useState<string | null>(null)
+  const [confirmId, setConfirmId] = React.useState<string | null>(null)
 
   const handleDelete = (id: string) => {
-    deletePG.mutate(id, { onSuccess: () => setConfirmDelete(null) })
+    deletePG.mutate(id, { onSuccess: () => setConfirmId(null) })
   }
 
   return (
     <MainLayout>
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-h1 text-white">My Listings</h1>
-        <Link to="/dashboard/listings/new" className="btn btn-primary" id="add-listing-btn">
-          <Plus size={16} /> Add Listing
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8 animate-fade-up opacity-0">
+        <div>
+          <h1 className="text-h1 text-white mb-1">My Listings</h1>
+          <p className="text-text-secondary text-sm">
+            {listings?.length ?? 0} total property listings
+          </p>
+        </div>
+        <Link
+          to="/dashboard/listings/new"
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-primary text-white font-semibold shadow-lg shadow-primary-glow/25 hover:brightness-110 hover:-translate-y-0.5 transition-all no-underline text-sm"
+        >
+          <Plus size={16} />
+          <span className="hidden sm:inline">Add Listing</span>
         </Link>
       </div>
 
       {isLoading ? (
-        <div className="flex flex-col gap-3">
-          {[...Array(4)].map((_, i) => <div key={i} className="skeleton h-24 rounded-2xl" />)}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div key={i} className="skeleton rounded-2xl h-56" />
+          ))}
         </div>
-      ) : listings.length === 0 ? (
-        <div className="glass-card p-16 text-center fade-in">
-          <div className="text-5xl mb-4">🏠</div>
-          <h3 className="text-h3 text-white mb-2">No listings yet</h3>
-          <p className="text-sm mb-6" style={{ color: 'var(--color-text-secondary)' }}>
-            Start by adding your first PG listing
-          </p>
-          <Link to="/dashboard/listings/new" className="btn btn-primary">
-            <Plus size={16} /> Add Your First Listing
+      ) : isError ? (
+        <div className="glass-card p-12 text-center animate-scale-in">
+          <AlertTriangle size={40} className="mx-auto mb-3 text-error opacity-70" />
+          <p className="text-red-400 font-medium mb-4">Failed to load listings</p>
+          <button onClick={() => window.location.reload()} className="px-5 py-2.5 rounded-xl bg-white/6 border border-white/10 text-white text-sm hover:bg-white/10 transition-colors">
+            Retry
+          </button>
+        </div>
+      ) : !listings?.length ? (
+        <div className="glass-card p-16 text-center animate-scale-in">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-primary mx-auto mb-5 flex items-center justify-center shadow-xl shadow-primary-glow/25">
+            <Home size={36} className="text-white" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">No listings yet</h3>
+          <p className="text-text-secondary mb-6 text-sm">Create your first PG listing and start getting inquiries.</p>
+          <Link to="/dashboard/listings/new" className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-primary text-white font-semibold hover:brightness-110 transition-all no-underline">
+            <Plus size={16} /> Create First Listing
           </Link>
         </div>
       ) : (
-        <div className="flex flex-col gap-3">
-          {listings.map((pg: PGListing) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {listings.map((pg, i) => (
             <div
               key={pg._id}
-              id={`listing-row-${pg._id}`}
-              className="glass-card p-5 flex items-center gap-5 fade-in"
+              className="glass-card overflow-hidden flex flex-col group animate-fade-up opacity-0"
+              style={{ animationDelay: `${i * 60}ms` }}
             >
-              {/* Thumbnail */}
-              <div className="w-20 h-16 rounded-xl overflow-hidden shrink-0">
+              {/* Image */}
+              <div className="relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
                 <img
-                  src={pg.images?.[0]?.url || `https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=160&q=60`}
+                  src={pg.images?.[0]?.url || `https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600&q=70`}
                   alt={pg.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-              </div>
-
-              {/* Details */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-white font-semibold text-sm truncate">{pg.title}</h3>
-                  <span className={`badge ${pg.isAvailable ? 'badge-green' : 'badge-red'} shrink-0`}>
-                    {pg.isAvailable ? 'Available' : 'Full'}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                {/* Availability badge */}
+                <div className="absolute top-3 left-3">
+                  <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-semibold border backdrop-blur-sm ${
+                    pg.isAvailable
+                      ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/25'
+                      : 'bg-red-500/20 text-red-300 border-red-500/25'
+                  }`}>
+                    {pg.isAvailable ? `${pg.availableRooms} Available` : 'Full'}
                   </span>
                 </div>
-                <p className="text-xs capitalize mb-2" style={{ color: 'var(--color-text-muted)' }}>
-                  {pg.location.city} · ₹{pg.rent.toLocaleString()}/mo · {pg.roomType}
-                </p>
-                <div className="flex gap-4 text-xs" style={{ color: 'var(--color-text-muted)' }}>
-                  <span className="flex items-center gap-1"><Eye size={12} /> {pg.analytics.views}</span>
-                  <span className="flex items-center gap-1"><Bookmark size={12} /> {pg.analytics.saves}</span>
-                  <span className="flex items-center gap-1"><MessageSquare size={12} /> {pg.analytics.inquiries}</span>
+                {/* Price */}
+                <div className="absolute bottom-3 left-3 text-white font-bold text-lg">
+                  ₹{pg.rent?.toLocaleString()}<span className="text-white/60 font-normal text-sm">/mo</span>
                 </div>
               </div>
 
-              {/* Actions */}
-              <div className="flex items-center gap-2 shrink-0">
-                <Link
-                  to={`/listings/${pg._id}`}
-                  target="_blank"
-                  className="btn btn-ghost btn-sm p-2"
-                  title="View public listing"
-                >
-                  <Eye size={16} />
-                </Link>
-                <Link
-                  to={`/dashboard/listings/${pg._id}/edit`}
-                  id={`edit-btn-${pg._id}`}
-                  className="btn btn-outline btn-sm"
-                >
-                  <Edit size={15} /> Edit
-                </Link>
-                {confirmDelete === pg._id ? (
-                  <div className="flex items-center gap-2">
-                    <button
-                      id={`confirm-delete-${pg._id}`}
-                      onClick={() => handleDelete(pg._id)}
-                      disabled={deletePG.isPending}
-                      className="btn btn-sm text-red-400 border-red-400/40 hover:bg-red-500/10"
-                      style={{ background: 'transparent', border: '1px solid' }}
-                    >
-                      {deletePG.isPending ? <Loader2 size={14} className="animate-spin" /> : 'Confirm'}
-                    </button>
-                    <button onClick={() => setConfirmDelete(null)} className="btn btn-ghost btn-sm">
-                      Cancel
-                    </button>
-                  </div>
-                ) : (
-                  <button
-                    id={`delete-btn-${pg._id}`}
-                    onClick={() => setConfirmDelete(pg._id)}
-                    className="btn btn-ghost btn-sm p-2 text-red-400 hover:text-red-300"
+              {/* Content */}
+              <div className="p-4 flex flex-col gap-3 flex-1">
+                <h3 className="text-white font-semibold leading-snug line-clamp-1 group-hover:text-primary-light transition-colors">
+                  {pg.title}
+                </h3>
+                <p className="text-text-muted text-xs capitalize">{pg.location?.city}</p>
+
+                {/* Analytics */}
+                <div className="flex items-center gap-4 text-xs text-text-muted border-t border-white/6 pt-3 mt-auto">
+                  <span className="flex items-center gap-1"><Eye size={12} /> {pg.analytics?.views} views</span>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2">
+                  <Link
+                    to={`/dashboard/listings/${pg._id}/edit`}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-white/5 border border-white/8 text-xs font-medium text-text-secondary hover:text-white hover:bg-white/10 hover:border-white/15 transition-all no-underline"
                   >
-                    <Trash2 size={16} />
-                  </button>
-                )}
+                    <Edit2 size={13} /> Edit
+                  </Link>
+                  {confirmId === pg._id ? (
+                    <div className="flex-1 flex gap-1">
+                      <button
+                        onClick={() => handleDelete(pg._id)}
+                        disabled={deletePG.isPending}
+                        className="flex-1 flex items-center justify-center gap-1 py-2 rounded-xl bg-error/20 border border-error/30 text-red-400 text-xs font-medium hover:bg-error/30 transition-all"
+                      >
+                        {deletePG.isPending ? <Loader2 size={12} className="animate-spin" /> : 'Confirm'}
+                      </button>
+                      <button
+                        onClick={() => setConfirmId(null)}
+                        className="px-3 py-2 rounded-xl bg-white/5 border border-white/8 text-xs text-text-muted hover:text-white transition-all"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setConfirmId(pg._id)}
+                      className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl bg-white/5 border border-white/8 text-xs font-medium text-text-muted hover:text-red-400 hover:bg-error/10 hover:border-error/20 transition-all"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           ))}
-        </div>
-      )}
-
-      {/* Confirm Delete modal hint */}
-      {confirmDelete && (
-        <div className="fixed bottom-6 right-6 glass-card p-4 flex items-center gap-3 text-sm fade-in">
-          <AlertTriangle size={16} className="text-amber-400" />
-          <span style={{ color: 'var(--color-text-secondary)' }}>This will soft-delete the listing.</span>
         </div>
       )}
     </MainLayout>
