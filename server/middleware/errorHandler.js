@@ -46,6 +46,10 @@ module.exports = (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
+  // Normalize JWT errors in ALL environments so the 401 is always correct
+  if (err.name === 'JsonWebTokenError') err = handleJWTError();
+  if (err.name === 'TokenExpiredError') err = handleJWTExpiredError();
+
   if (process.env.NODE_ENV === 'development') {
     sendErrorDev(err, res);
   } else {
@@ -54,8 +58,6 @@ module.exports = (err, req, res, next) => {
     if (err.name === 'CastError') error = handleCastErrorDB(error);
     if (err.code === 11000) error = handleDuplicateFieldsDB(error);
     if (err.name === 'ValidationError') error = handleValidationErrorDB(error);
-    if (err.name === 'JsonWebTokenError') error = handleJWTError();
-    if (err.name === 'TokenExpiredError') error = handleJWTExpiredError();
 
     sendErrorProd(error, res);
   }

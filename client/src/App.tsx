@@ -1,89 +1,91 @@
-import React, { Suspense, lazy } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import ProtectedRoute from '@/components/ProtectedRoute'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AppLayout } from '@/components/layout/AppLayout';
+import { PublicLayout } from '@/components/layout/PublicLayout';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { ToastContainer } from '@/components/ui/Toast';
+import { OnboardingModal } from '@/components/auth/OnboardingModal';
+import { useAuthStore } from '@/stores/authStore';
 
-// Lazy-loaded pages
-const HomePage       = lazy(() => import('@/pages/HomePage'))
-const LoginPage      = lazy(() => import('@/pages/LoginPage'))
-const RegisterPage   = lazy(() => import('@/pages/RegisterPage'))
-const ListingsPage   = lazy(() => import('@/pages/ListingsPage'))
-const PGDetailPage   = lazy(() => import('@/pages/PGDetailPage'))
-const SavedPage      = lazy(() => import('@/pages/SavedPage'))
-const InquiriesPage  = lazy(() => import('@/pages/InquiriesPage'))
-const DashboardPage  = lazy(() => import('@/pages/dashboard/DashboardPage'))
-const MyListingsPage = lazy(() => import('@/pages/dashboard/MyListingsPage'))
-const NewPGPage      = lazy(() => import('@/pages/dashboard/NewPGPage'))
-const EditPGPage     = lazy(() => import('@/pages/dashboard/EditPGPage'))
-const OwnerInquiries = lazy(() => import('@/pages/dashboard/OwnerInquiriesPage'))
+// Pages
+import { HomePage } from '@/pages/HomePage';
+import { LoginPage } from '@/pages/auth/LoginPage';
+import { RegisterPage } from '@/pages/auth/RegisterPage';
+import { PhoneLoginPage } from '@/pages/auth/PhoneLoginPage';
+import { PGListPage } from '@/pages/pg/PGListPage';
+import { PGDetailsPage } from '@/pages/pg/PGDetailsPage';
+import { DashboardPage } from '@/pages/dashboard/DashboardPage';
+import { MyListingsPage } from '@/pages/dashboard/MyListingsPage';
+import { NewPGPage } from '@/pages/dashboard/NewPGPage';
+import { InquiriesPage } from '@/pages/dashboard/InquiriesPage';
+import { SavedListingsPage } from '@/pages/dashboard/SavedListingsPage';
 
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center app-bg">
-    <div className="flex flex-col items-center gap-4">
-      <div className="w-12 h-12 gradient-primary rounded-2xl flex items-center justify-center animate-pulse">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2L3 9v13h18V9L12 2z" fill="white"/>
-        </svg>
-      </div>
-      <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Loading...</p>
-    </div>
-  </div>
-)
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 2, // 2 minutes
+      retry: 1,
+    },
+  },
+});
 
-const App: React.FC = () => (
-  <BrowserRouter>
-    <Suspense fallback={<PageLoader />}>
-      <Routes>
-        {/* Public */}
-        <Route path="/"         element={<HomePage />} />
-        <Route path="/login"    element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/listings" element={<ListingsPage />} />
-        <Route path="/listings/:id" element={<PGDetailPage />} />
+/**
+ * Shows the onboarding modal when user is authenticated but hasn't completed onboarding.
+ * `isOnboarded === false` is strict — undefined (legacy users) is treated as onboarded.
+ */
+function OnboardingGate() {
+  const { user, isAuthenticated } = useAuthStore();
+  const needsOnboarding = isAuthenticated && user && user.isOnboarded === false;
+  if (!needsOnboarding) return null;
+  return <OnboardingModal />;
+}
 
-        {/* Student only */}
-        <Route path="/saved" element={
-          <ProtectedRoute allowedRoles={['student']}>
-            <SavedPage />
-          </ProtectedRoute>
-        }/>
-        <Route path="/my-inquiries" element={
-          <ProtectedRoute allowedRoles={['student']}>
-            <InquiriesPage />
-          </ProtectedRoute>
-        }/>
+function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <Routes>
+          {/* Public routes */}
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/phone-login" element={<PhoneLoginPage />} />
 
-        {/* Owner only */}
-        <Route path="/dashboard" element={
-          <ProtectedRoute allowedRoles={['owner']}>
-            <DashboardPage />
-          </ProtectedRoute>
-        }/>
-        <Route path="/dashboard/listings" element={
-          <ProtectedRoute allowedRoles={['owner']}>
-            <MyListingsPage />
-          </ProtectedRoute>
-        }/>
-        <Route path="/dashboard/listings/new" element={
-          <ProtectedRoute allowedRoles={['owner']}>
-            <NewPGPage />
-          </ProtectedRoute>
-        }/>
-        <Route path="/dashboard/listings/:id/edit" element={
-          <ProtectedRoute allowedRoles={['owner']}>
-            <EditPGPage />
-          </ProtectedRoute>
-        }/>
-        <Route path="/dashboard/inquiries" element={
-          <ProtectedRoute allowedRoles={['owner']}>
-            <OwnerInquiries />
-          </ProtectedRoute>
-        }/>
+          <Route element={<PublicLayout />}>
+            <Route path="/pg" element={<PGListPage />} />
+            <Route path="/pg/:id" element={<PGDetailsPage />} />
+          </Route>
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Suspense>
-  </BrowserRouter>
-)
+          {/* Protected routes (any authenticated user) */}
+          <Route element={<ProtectedRoute />}>
+            <Route element={<AppLayout />}>
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/dashboard/inquiries" element={<InquiriesPage />} />
 
-export default App
+              {/* Student-only */}
+              <Route element={<ProtectedRoute role="student" />}>
+                <Route path="/dashboard/saved" element={<SavedListingsPage />} />
+              </Route>
+
+              {/* Owner-only */}
+              <Route element={<ProtectedRoute role="owner" />}>
+                <Route path="/dashboard/listings" element={<MyListingsPage />} />
+                <Route path="/dashboard/listings/new" element={<NewPGPage />} />
+                <Route path="/dashboard/listings/:id/edit" element={<NewPGPage />} />
+              </Route>
+            </Route>
+          </Route>
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+
+        {/* Global onboarding gate — renders over any page */}
+        <OnboardingGate />
+        <ToastContainer />
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+}
+
+export default App;

@@ -5,23 +5,28 @@ const userSchema = new mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'Name is required'],
       trim: true,
       maxlength: [60, 'Name cannot exceed 60 characters'],
+      default: '',
     },
     email: {
       type: String,
-      required: [true, 'Email is required'],
       unique: true,
+      sparse: true, // allows multiple docs without email (phone-only users)
       lowercase: true,
       trim: true,
       match: [/^\S+@\S+\.\S+$/, 'Please enter a valid email'],
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
       minlength: [8, 'Password must be at least 8 characters'],
       select: false,
+    },
+    firebaseUid: {
+      type: String,
+      unique: true,
+      sparse: true, // only phone/social users have this
+      index: true,
     },
     role: {
       type: String,
@@ -32,6 +37,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       match: [/^\+?[0-9]{10,15}$/, 'Please enter a valid phone number'],
     },
+    phoneVerified: {
+      type: Boolean,
+      default: false,
+    },
     avatar: {
       type: String,
       default: '',
@@ -39,6 +48,10 @@ const userSchema = new mongoose.Schema(
     refreshToken: {
       type: String,
       select: false,
+    },
+    isOnboarded: {
+      type: Boolean,
+      default: false,
     },
     isVerified: {
       type: Boolean,
@@ -53,14 +66,12 @@ const userSchema = new mongoose.Schema(
 );
 
 // Indexes
-userSchema.index({ email: 1 });
 userSchema.index({ role: 1 });
 
-// Hash password before save
-userSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
+// Hash password before save — only if password is set and modified
+userSchema.pre('save', async function () {
+  if (!this.password || !this.isModified('password')) return;
   this.password = await bcrypt.hash(this.password, 12);
-  next();
 });
 
 // Compare password
@@ -69,9 +80,8 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
 };
 
 // Soft delete filter
-userSchema.pre(/^find/, function (next) {
-  this.find({ isDeleted: { $ne: true } });
-  next();
+userSchema.pre(/^find/, function () {
+  this.where({ isDeleted: { $ne: true } });
 });
 
 // Omit sensitive fields in JSON output

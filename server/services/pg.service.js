@@ -8,7 +8,7 @@ const buildFilter = (query) => {
   const filter = {};
 
   if (query.city) filter['location.city'] = { $regex: query.city, $options: 'i' };
-  if (query.gender) filter.genderPreference = query.gender;
+  if (query.genderPreference) filter.genderPreference = query.genderPreference;
   if (query.roomType) filter.roomType = query.roomType;
   if (query.isAvailable !== undefined) filter.isAvailable = query.isAvailable === 'true';
 
@@ -41,6 +41,8 @@ exports.getAllPGs = async (query) => {
     oldest: { createdAt: 1 },
     price_asc: { rent: 1 },
     price_desc: { rent: -1 },
+    rent_asc: { rent: 1 },
+    rent_desc: { rent: -1 },
     popular: { 'analytics.views': -1 },
   };
   const sort = sortOptions[query.sort] || { createdAt: -1 };
@@ -120,12 +122,12 @@ exports.deletePG = async (id, ownerId) => {
 /**
  * Add images to a PG listing
  */
-exports.addImages = async (id, ownerId, files) => {
+exports.addImages = async (id, ownerId, images) => {
   const pg = await PGListing.findOne({ _id: id, owner: ownerId });
   if (!pg) throw new AppError('PG not found or not authorized.', 404);
 
-  const newImages = files.map((f) => ({ url: f.path, publicId: f.filename }));
-  pg.images.push(...newImages);
+  // images is already an array of { url, publicId } objects (processed by controller)
+  pg.images.push(...images);
   await pg.save();
   return pg;
 };

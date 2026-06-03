@@ -1,213 +1,153 @@
-import React from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { Search, MapPin, ShieldCheck, Zap, Building2, ArrowRight, Star, Users, TrendingUp } from 'lucide-react'
-import MainLayout from '@/layouts/MainLayout'
+import { Link, useNavigate } from 'react-router-dom';
+import {
+  Search, MapPin, Shield, Star, ArrowRight, Building2, TrendingUp,
+} from 'lucide-react';
+import { useAuthStore } from '@/stores/authStore';
+import { Button } from '@/components/ui/Button';
+import { Footer } from '@/components/layout/Footer';
 
-const CITIES = ['Mumbai', 'Delhi', 'Pune', 'Bangalore', 'Hyderabad', 'Chennai']
+const features = [
+  { icon: <Search className="h-5 w-5" />, title: 'Smart Search', desc: 'Filter by city, rent range, amenities and more' },
+  { icon: <MapPin className="h-5 w-5" />, title: 'Verified Locations', desc: 'Google Maps integration for precise location' },
+  { icon: <Shield className="h-5 w-5" />, title: 'Trusted Listings', desc: 'All PGs are verified by our team' },
+  { icon: <Star className="h-5 w-5" />, title: 'Top Rated', desc: 'Browse highest rated PGs in your area' },
+];
 
-const STATS = [
-  { value: '2,400+', label: 'Verified PGs', icon: ShieldCheck, color: 'text-emerald-400' },
-  { value: '18K+', label: 'Happy Students', icon: Users, color: 'text-blue-400' },
-  { value: '95%', label: 'Satisfaction Rate', icon: Star, color: 'text-amber-400' },
-  { value: '40+', label: 'Cities Covered', icon: TrendingUp, color: 'text-purple-400' },
-]
+const stats = [
+  { value: '1,200+', label: 'PG Listings' },
+  { value: '8,500+', label: 'Happy Students' },
+  { value: '50+', label: 'Cities' },
+  { value: '4.8★', label: 'Avg Rating' },
+];
 
-const FEATURES = [
-  {
-    icon: Search, color: 'from-blue-500 to-cyan-400',
-    title: 'Smart Filtering',
-    desc: 'Filter by amenities, room type, gender preference, and price range to find exactly what you need.'
-  },
-  {
-    icon: ShieldCheck, color: 'from-emerald-500 to-teal-400',
-    title: 'Verified Listings',
-    desc: 'Every property and owner is background-verified for your complete safety and peace of mind.'
-  },
-  {
-    icon: Zap, color: 'from-amber-500 to-orange-400',
-    title: 'Zero Brokerage',
-    desc: 'Connect directly with landlords. No hidden fees, no middlemen, no commissions ever.'
-  },
-]
-
-const HomePage: React.FC = () => {
-  const [query, setQuery] = React.useState('')
-  const navigate = useNavigate()
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    navigate(query.trim() ? `/listings?city=${encodeURIComponent(query)}` : '/listings')
-  }
+export function HomePage() {
+  const { isAuthenticated } = useAuthStore();
+  const navigate = useNavigate();
 
   return (
-    <MainLayout>
-      <div className="flex flex-col gap-28 pb-16">
+    <div className="min-h-screen bg-[hsl(222,47%,6%)]">
+      {/* Hero */}
+      <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 text-center">
+        {/* Ambient glows */}
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute left-1/2 top-0 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-violet-600/15 blur-[120px]" />
+          <div className="absolute bottom-0 left-0 h-64 w-64 rounded-full bg-cyan-600/10 blur-[80px]" />
+          <div className="absolute bottom-0 right-0 h-64 w-64 rounded-full bg-violet-600/10 blur-[80px]" />
+        </div>
 
-        {/* ── Hero ─────────────────────────────────────────── */}
-        <section className="relative pt-10 lg:pt-20 flex flex-col items-center text-center">
-          {/* Hero glow */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] bg-gradient-glow pointer-events-none" />
-
-          {/* Badge */}
-          <div className="animate-fade-up opacity-0 inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-primary/25 text-primary-light text-xs font-semibold uppercase tracking-widest mb-8">
-            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            Premium Student Housing Platform
-          </div>
-
-          {/* Headline */}
-          <h1 className="text-display max-w-4xl text-transparent bg-clip-text bg-gradient-to-br from-slate-100 via-blue-100 to-primary-light mb-6 animate-fade-up opacity-0 delay-100">
-            Find Your Perfect
-            <br className="hidden sm:block" />
-            <span className="gradient-text"> PG in Minutes</span>
-          </h1>
-
-          <p className="text-text-secondary text-lg md:text-xl max-w-2xl mb-12 leading-relaxed animate-fade-up opacity-0 delay-200">
-            Browse thousands of verified paying-guest accommodations. Filter by city, budget, and amenities — zero broker fees.
-          </p>
-
-          {/* Search bar */}
-          <form
-            onSubmit={handleSearch}
-            className="w-full max-w-2xl animate-fade-up opacity-0 delay-300"
-          >
-            <div className="relative flex items-center glass border border-white/10 rounded-2xl p-2 shadow-2xl shadow-black/30 focus-within:border-primary/40 focus-within:shadow-primary/10 transition-all duration-300">
-              <div className="pl-3 pr-2 shrink-0">
-                <MapPin size={22} className="text-text-muted" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search by city — Pune, Mumbai, Delhi..."
-                value={query}
-                onChange={e => setQuery(e.target.value)}
-                className="flex-1 bg-transparent outline-none text-white placeholder:text-text-muted text-base py-2 px-2"
-              />
-              <button
-                type="submit"
-                className="flex items-center gap-2 px-6 py-3 rounded-xl bg-gradient-primary text-white font-semibold shadow-lg shadow-primary-glow/30 hover:brightness-110 hover:-translate-y-0.5 active:translate-y-0 transition-all duration-200 shrink-0"
-              >
-                <Search size={18} />
-                <span className="hidden sm:inline">Search</span>
-              </button>
+        {/* Navbar */}
+        <nav className="absolute top-0 w-full flex items-center justify-between border-b border-white/8 px-8 py-5">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600">
+              <Building2 className="h-4 w-4 text-white" />
             </div>
-          </form>
+            <span className="gradient-text text-xl font-bold">Anei Ghar</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <Link to="/pg">
+              <Button variant="ghost" size="sm">Browse PGs</Button>
+            </Link>
+            {isAuthenticated ? (
+              <Link to="/dashboard">
+                <Button size="sm">Dashboard</Button>
+              </Link>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="outline" size="sm">Sign In</Button>
+                </Link>
+                <Link to="/register">
+                  <Button size="sm">Get Started</Button>
+                </Link>
+              </>
+            )}
+          </div>
+        </nav>
 
-          {/* Quick city chips */}
-          <div className="flex flex-wrap justify-center gap-2 mt-5 animate-fade-up opacity-0 delay-400">
-            <span className="text-sm text-text-muted">Popular:</span>
-            {CITIES.map(city => (
-              <button
-                key={city}
-                onClick={() => navigate(`/listings?city=${city}`)}
-                className="px-3 py-1 rounded-full text-xs font-medium glass border border-white/10 text-text-secondary hover:text-white hover:border-primary/30 transition-all duration-200"
+        {/* Hero Content */}
+        <div className="relative animate-fade-in">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1.5 text-sm text-violet-300">
+            <TrendingUp className="h-3.5 w-3.5" />
+            <span>1,200+ PG listings across India</span>
+          </div>
+          <h1 className="mb-6 text-5xl font-bold leading-tight text-white md:text-7xl">
+            Find Your Perfect{' '}
+            <span className="gradient-text">PG Stay</span>
+          </h1>
+          <p className="mx-auto mb-10 max-w-xl text-lg text-white/50">
+            Anei Ghar connects students with verified PG accommodations. Browse
+            listings, compare amenities, and move in — stress-free.
+          </p>
+          <div className="flex flex-wrap justify-center gap-4">
+            <Button size="lg" onClick={() => navigate('/pg')} id="hero-browse-btn">
+              Browse PGs <ArrowRight className="h-4 w-4" />
+            </Button>
+            {!isAuthenticated && (
+              <Button variant="outline" size="lg" onClick={() => navigate('/register')} id="hero-list-btn">
+                List Your PG
+              </Button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      {/* Stats */}
+      <section className="border-y border-white/8 px-6 py-12">
+        <div className="mx-auto grid max-w-4xl grid-cols-2 gap-8 md:grid-cols-4">
+          {stats.map((s) => (
+            <div key={s.label} className="text-center">
+              <div className="gradient-text text-4xl font-bold">{s.value}</div>
+              <div className="mt-1 text-sm text-white/50">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="px-6 py-20">
+        <div className="mx-auto max-w-5xl">
+          <h2 className="mb-12 text-center text-3xl font-bold text-white">
+            Why Choose <span className="gradient-text">Anei Ghar</span>?
+          </h2>
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {features.map((f) => (
+              <div
+                key={f.title}
+                className="rounded-2xl border border-white/8 bg-white/5 p-6 transition-all duration-300 hover:border-violet-500/30 hover:bg-white/8"
               >
-                {city}
-              </button>
+                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-violet-600/20 text-violet-400">
+                  {f.icon}
+                </div>
+                <h3 className="mb-2 font-semibold text-white">{f.title}</h3>
+                <p className="text-sm text-white/50">{f.desc}</p>
+              </div>
             ))}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* ── Stats ────────────────────────────────────────── */}
-        <section className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-          {STATS.map((stat, i) => (
-            <div
-              key={i}
-              className={`glass-card p-6 text-center animate-fade-up opacity-0`}
-              style={{ animationDelay: `${i * 100}ms` }}
-            >
-              <div className={`flex justify-center mb-3 ${stat.color}`}>
-                <stat.icon size={26} />
-              </div>
-              <div className="text-2xl md:text-3xl font-bold text-white mb-1">{stat.value}</div>
-              <div className="text-xs md:text-sm text-text-secondary">{stat.label}</div>
-            </div>
-          ))}
-        </section>
+      {/* CTA */}
+      <section className="px-6 py-20">
+        <div className="mx-auto max-w-2xl rounded-3xl border border-violet-500/20 bg-violet-600/10 p-12 text-center backdrop-blur-sm">
+          <h2 className="mb-4 text-3xl font-bold text-white">
+            Ready to find your home?
+          </h2>
+          <p className="mb-8 text-white/50">
+            Join thousands of students who found their perfect PG on Anei Ghar.
+          </p>
+          {!isAuthenticated ? (
+            <Button size="lg" onClick={() => navigate('/register')} id="cta-btn">
+              Create Free Account <ArrowRight className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button size="lg" onClick={() => navigate('/pg')} id="cta-btn">
+              Browse Listings <ArrowRight className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+      </section>
 
-        {/* ── Features ─────────────────────────────────────── */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {FEATURES.map((feat, i) => (
-            <div
-              key={i}
-              className={`glass-card-interactive p-8 group animate-fade-up opacity-0`}
-              style={{ animationDelay: `${i * 120}ms` }}
-            >
-              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feat.color} p-0.5 mb-6`}>
-                <div className="w-full h-full bg-bg-card rounded-[14px] flex items-center justify-center">
-                  <feat.icon size={24} className="text-white" />
-                </div>
-              </div>
-              <h3 className="text-lg font-bold text-white mb-3 group-hover:text-primary-light transition-colors">
-                {feat.title}
-              </h3>
-              <p className="text-text-secondary leading-relaxed text-sm">{feat.desc}</p>
-            </div>
-          ))}
-        </section>
-
-        {/* ── Owner CTA ─────────────────────────────────────── */}
-        <section className="relative overflow-hidden rounded-3xl border border-primary/15 p-8 md:p-14 flex flex-col lg:flex-row items-center justify-between gap-10 animate-fade-up opacity-0">
-          {/* background */}
-          <div className="absolute inset-0 bg-gradient-card pointer-events-none" />
-          <div className="absolute -right-20 -top-20 w-80 h-80 bg-primary/15 rounded-full blur-[80px] pointer-events-none" />
-          <div className="absolute -left-20 -bottom-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-[80px] pointer-events-none" />
-
-          <div className="relative z-10 text-center lg:text-left max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/15 border border-primary/25 text-primary-light text-xs font-semibold uppercase tracking-wider mb-6">
-              <Building2 size={14} />
-              For Property Owners
-            </div>
-            <h2 className="text-h1 text-white mb-4">
-              List Your PG &amp;<br />Reach Thousands
-            </h2>
-            <p className="text-text-secondary text-lg mb-8 leading-relaxed">
-              Join 2,400+ verified property owners on Anei Ghar. Get real inquiries from verified students — completely free.
-            </p>
-            <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
-              <Link
-                to="/register"
-                className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-bold text-bg bg-white hover:bg-slate-100 shadow-xl transition-all hover:-translate-y-0.5 no-underline"
-              >
-                Start Listing Free <ArrowRight size={18} />
-              </Link>
-              <Link
-                to="/login"
-                className="flex items-center gap-2 px-8 py-3.5 rounded-xl font-semibold text-white glass border border-white/15 hover:border-white/30 hover:bg-white/5 transition-all no-underline"
-              >
-                Owner Login
-              </Link>
-            </div>
-          </div>
-
-          {/* Decorative card mockup */}
-          <div className="relative z-10 hidden lg:block shrink-0 animate-float">
-            <div className="glass-card p-6 w-72 border-primary/20 shadow-2xl shadow-black/40">
-              <div className="flex items-center justify-between mb-5">
-                <span className="text-xs font-semibold text-text-muted uppercase tracking-wider">Live Dashboard</span>
-                <span className="flex items-center gap-1 text-xs text-emerald-400 font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  Live
-                </span>
-              </div>
-              {[
-                { label: 'Views Today', val: '142', trend: '+12%' },
-                { label: 'New Inquiries', val: '8', trend: '+3' },
-                { label: 'Saved by Students', val: '24', trend: '+5' },
-              ].map((row, i) => (
-                <div key={i} className={`flex items-center justify-between py-3 ${i < 2 ? 'border-b border-white/6' : ''}`}>
-                  <span className="text-sm text-text-secondary">{row.label}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-white font-bold">{row.val}</span>
-                    <span className="text-xs text-emerald-400">{row.trend}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-      </div>
-    </MainLayout>
-  )
+      <Footer />
+    </div>
+  );
 }
-
-export default HomePage

@@ -28,6 +28,32 @@ exports.login = catchAsync(async (req, res) => {
   });
 });
 
+exports.phoneLogin = catchAsync(async (req, res) => {
+  const { idToken } = req.body;
+  if (!idToken) {
+    return res.status(400).json({ status: 'fail', message: 'idToken is required.' });
+  }
+
+  const { user, accessToken, refreshToken } = await authService.phoneLogin({ idToken });
+
+  sendRefreshTokenCookie(res, refreshToken);
+
+  res.status(200).json({
+    status: 'success',
+    data: { user, accessToken },
+  });
+});
+
+exports.updateProfile = catchAsync(async (req, res) => {
+  const { name, role, phone } = req.body;
+  const user = await authService.updateProfile(req.user._id, { name, role, phone });
+
+  res.status(200).json({
+    status: 'success',
+    data: { user },
+  });
+});
+
 exports.refreshToken = catchAsync(async (req, res) => {
   const token = req.cookies.refreshToken;
   const { user, accessToken, refreshToken } = await authService.refreshToken(token);

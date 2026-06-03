@@ -64,7 +64,7 @@ app.use('/api/saves', savesRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 
 // ─── 404 Handler ──────────────────────────────────────────────────────────────
-app.all('*', (req, res, next) => {
+app.use((req, res, next) => {
   next(new AppError(`Cannot find ${req.method} ${req.originalUrl} on this server.`, 404));
 });
 

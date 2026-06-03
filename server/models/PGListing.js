@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 
 const amenityEnum = [
-  'wifi', 'ac', 'parking', 'laundry', 'meals', 'gym',
-  'cctv', 'housekeeping', 'water_purifier', 'power_backup',
+  'wifi', 'ac', 'parking', 'meals', 'tv', 'security',
+  'laundry', 'gym', 'garden', 'cctv', 'power-backup',
+  'housekeeping', 'water_purifier',
 ];
 
 const pgListingSchema = new mongoose.Schema(
@@ -102,10 +103,9 @@ pgListingSchema.index({ isAvailable: 1 });
 pgListingSchema.index({ owner: 1 });
 pgListingSchema.index({ 'location.city': 1, rent: 1, genderPreference: 1 });
 
-// Soft delete filter
-pgListingSchema.pre(/^find/, function (next) {
-  this.find({ isDeleted: { $ne: true } });
-  next();
+// Soft delete filter — async hooks use the returned Promise; no `next` needed
+pgListingSchema.pre(/^find/, function () {
+  this.where({ isDeleted: { $ne: true } });
 });
 
 module.exports = mongoose.model('PGListing', pgListingSchema);
