@@ -82,8 +82,8 @@ export function PhoneLoginPage() {
     await sendOtp();
   };
 
-  const verifyOtp = async () => {
-    const code = otp.join('');
+  const verifyOtp = async (otpOverride?: string[]) => {
+    const code = (otpOverride ?? otp).join('');
     if (code.length < OTP_LENGTH) {
       setVerifyError('Please enter the complete 6-digit OTP.');
       return;
@@ -123,10 +123,9 @@ export function PhoneLoginPage() {
     if (digit && index < OTP_LENGTH - 1) {
       otpRefs.current[index + 1]?.focus();
     }
-    // Auto-submit when all filled
+    // Auto-submit when all filled — pass newOtp directly to avoid stale closure
     if (digit && index === OTP_LENGTH - 1 && newOtp.every(Boolean)) {
-      // small delay so state updates before submit
-      setTimeout(verifyOtp, 100);
+      setTimeout(() => verifyOtp(newOtp), 100);
     }
   };
 

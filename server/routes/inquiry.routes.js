@@ -7,7 +7,7 @@ router.use(protect);
 
 // Student: send inquiry
 router.post('/', restrictTo('student'), inquiryController.createInquiry);
-router.get('/my-inquiries', restrictTo('student'), inquiryController.getStudentInquiries);
+router.get('/student', restrictTo('student'), inquiryController.getStudentInquiries);
 
 // Owner: view and manage
 router.get('/owner', restrictTo('owner'), inquiryController.getOwnerInquiries);

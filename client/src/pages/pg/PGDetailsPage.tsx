@@ -47,7 +47,14 @@ export function PGDetailsPage() {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<InquiryFormData>({ resolver: zodResolver(inquirySchema) });
+  } = useForm<InquiryFormData>({
+    resolver: zodResolver(inquirySchema),
+    defaultValues: {
+      // Pre-fill phone from user profile — strip non-digits then reformat
+      phone: user?.phone ?? '',
+      message: '',
+    },
+  });
 
   const pg = data?.data.pg;
 
@@ -251,8 +258,13 @@ export function PGDetailsPage() {
                   placeholder="+91 98765 43210"
                   icon={<Phone className="h-4 w-4" />}
                   error={errors.phone?.message}
+                  readOnly={!!user?.phone}
+                  className={user?.phone ? 'opacity-70 cursor-not-allowed' : ''}
                   {...register('phone')}
                 />
+                {user?.phone && (
+                  <p className="-mt-1 text-xs text-white/30">Auto-filled from your profile</p>
+                )}
                 <Button
                   type="submit"
                   className="w-full"
