@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Building2 } from 'lucide-react';
+import logo from '@/assets/logo.png';
 
 export function Footer() {
   return (
@@ -9,8 +9,8 @@ export function Footer() {
           {/* Branding Column */}
           <div className="space-y-4 md:col-span-2">
             <Link to="/" className="flex items-center gap-2">
-              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-600">
-                <Building2 className="h-3.5 w-3.5 text-white" />
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-violet-600 shadow-md">
+                <img src={logo} className="h-4.5 w-4.5 object-contain" alt="Anei Ghar Logo" />
               </div>
               <span className="gradient-text font-bold text-lg">Anei Ghar</span>
             </Link>

@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Building2, Phone, ArrowLeft, RefreshCw, ShieldCheck } from 'lucide-react';
+import { Phone, ArrowLeft, RefreshCw, ShieldCheck } from 'lucide-react';
 import { auth, RecaptchaVerifier, signInWithPhoneNumber } from '@/lib/firebase';
 import { usePhoneLogin } from '@/hooks/useAuth';
 import type { ConfirmationResult } from 'firebase/auth';
+import logo from '@/assets/logo.png';
 
 const COUNTRY_CODE = '+91';
 const OTP_LENGTH = 6;
@@ -172,7 +173,7 @@ export function PhoneLoginPage() {
         {/* Logo */}
         <div className="mb-8 text-center">
           <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-600 shadow-lg shadow-violet-500/30">
-            <Building2 className="h-7 w-7 text-white" />
+            <img src={logo} className="h-8 w-8 object-contain" alt="Anei Ghar Logo" />
           </div>
           <h1 className="text-2xl font-bold text-white">
             {step === 'phone' ? 'Enter your phone' : 'Verify your number'}
@@ -282,7 +283,7 @@ export function PhoneLoginPage() {
               {/* Verify button */}
               <button
                 id="verify-otp-btn"
-                onClick={verifyOtp}
+                onClick={() => verifyOtp()}
                 disabled={verifying || otp.join('').length < OTP_LENGTH}
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-violet-600 px-4 py-3.5 text-sm font-semibold text-white shadow-lg shadow-violet-500/25 transition-all duration-200 hover:bg-violet-500 hover:shadow-violet-500/40 disabled:cursor-not-allowed disabled:opacity-50"
               >

@@ -8,6 +8,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { useLogout } from '@/hooks/useAuth';
 import { Avatar } from '@/components/ui';
 import { cn } from '@/lib/utils';
+import logo from '@/assets/logo.png';
 
 interface NavItem {
   label: string;
@@ -58,8 +59,8 @@ export function Sidebar() {
         {/* Logo */}
         <div className="flex items-center justify-between border-b border-white/8 px-6 py-5">
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600">
-              <Building2 className="h-4 w-4 text-white" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600 shadow-lg shadow-violet-500/20">
+              <img src={logo} className="h-5 w-5 object-contain" alt="Anei Ghar Logo" />
             </div>
             <span className="gradient-text text-xl font-bold">Anei Ghar</span>
           </Link>

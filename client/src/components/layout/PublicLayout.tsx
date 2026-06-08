@@ -1,13 +1,14 @@
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
-import { Building2, Menu, X, Home, Search, LayoutDashboard, LogIn, UserPlus } from 'lucide-react';
+import { Menu, X, Home, Search, LayoutDashboard, LogIn, UserPlus } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import { Footer } from './Footer';
+import logo from '@/assets/logo.png';
 
 export function PublicLayout() {
-  const { isAuthenticated, user } = useAuthStore();
+  const { isAuthenticated } = useAuthStore();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -25,7 +26,7 @@ export function PublicLayout() {
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600 shadow-lg shadow-violet-500/20">
-              <Building2 className="h-4 w-4 text-white" />
+              <img src={logo} className="h-5 w-5 object-contain" alt="Anei Ghar Logo" />
             </div>
             <span className="gradient-text text-xl font-bold tracking-tight">Anei Ghar</span>
           </Link>

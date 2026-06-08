@@ -1,10 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  Search, MapPin, Shield, Star, ArrowRight, Building2, TrendingUp,
+  Search, MapPin, Shield, Star, ArrowRight, TrendingUp,
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/Button';
 import { Footer } from '@/components/layout/Footer';
+import logo from '@/assets/logo.png';
 
 const features = [
   { icon: <Search className="h-5 w-5" />, title: 'Smart Search', desc: 'Filter by city, rent range, amenities and more' },
@@ -38,8 +39,8 @@ export function HomePage() {
         {/* Navbar */}
         <nav className="absolute top-0 w-full flex items-center justify-between border-b border-white/8 px-8 py-5">
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600">
-              <Building2 className="h-4 w-4 text-white" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600 shadow-lg shadow-violet-500/20">
+              <img src={logo} className="h-5 w-5 object-contain" alt="Anei Ghar Logo" />
             </div>
             <span className="gradient-text text-xl font-bold">Anei Ghar</span>
           </Link>

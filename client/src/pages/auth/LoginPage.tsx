@@ -2,10 +2,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, Building2, Phone } from 'lucide-react';
+import { Mail, Lock, Phone } from 'lucide-react';
 import { useLogin } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import logo from '@/assets/logo.png';
 
 const schema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -43,7 +44,7 @@ export function LoginPage() {
         {/* Logo */}
         <div className="mb-8 text-center">
           <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-600 shadow-lg shadow-violet-500/30">
-            <Building2 className="h-7 w-7 text-white" />
+            <img src={logo} className="h-8 w-8 object-contain" alt="Anei Ghar Logo" />
           </div>
           <h1 className="text-2xl font-bold text-white">Welcome back</h1>
           <p className="mt-1 text-white/50">Sign in to your Anei Ghar account</p>

@@ -2,11 +2,12 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
-import { Mail, Lock, User, Building2, Phone } from 'lucide-react';
+import { Mail, Lock, User, Phone } from 'lucide-react';
 import { useRegister } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Input';
+import logo from '@/assets/logo.png';
 
 const schema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -49,7 +50,7 @@ export function RegisterPage() {
         {/* Logo */}
         <div className="mb-8 text-center">
           <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-600 shadow-lg shadow-violet-500/30">
-            <Building2 className="h-7 w-7 text-white" />
+            <img src={logo} className="h-8 w-8 object-contain" alt="Anei Ghar Logo" />
           </div>
           <h1 className="text-2xl font-bold text-white">Create your account</h1>
           <p className="mt-1 text-white/50">Join Anei Ghar — find or list PGs</p>
