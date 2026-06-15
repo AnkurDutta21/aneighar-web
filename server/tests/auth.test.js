@@ -10,6 +10,10 @@ describe('Auth Routes', () => {
     role: 'student'
   };
 
+  beforeEach(async () => {
+    await User.deleteMany({});
+  });
+
   it('should register a new user successfully', async () => {
     const res = await request(app)
       .post('/api/auth/register')

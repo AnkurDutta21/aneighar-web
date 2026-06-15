@@ -12,6 +12,7 @@ import { HomePage } from '@/pages/HomePage';
 import { LoginPage } from '@/pages/auth/LoginPage';
 import { RegisterPage } from '@/pages/auth/RegisterPage';
 import { PhoneLoginPage } from '@/pages/auth/PhoneLoginPage';
+import { ResetPasswordPage } from '@/pages/auth/ResetPasswordPage';
 import { PGListPage } from '@/pages/pg/PGListPage';
 import { PGDetailsPage } from '@/pages/pg/PGDetailsPage';
 import { DashboardPage } from '@/pages/dashboard/DashboardPage';
@@ -50,6 +51,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/phone-login" element={<PhoneLoginPage />} />
+          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
           <Route element={<PublicLayout />}>
             <Route path="/pg" element={<PGListPage />} />

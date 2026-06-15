@@ -76,7 +76,7 @@ describe('PG CRUD Routes', () => {
   it('should fetch all PG listings', async () => {
     const res = await request(app).get('/api/pg');
     expect(res.statusCode).toBe(200);
-    expect(res.body.data.listings.length).toBeGreaterThan(0);
+    expect(res.body.listings.length).toBeGreaterThan(0);
   });
 
   it('should fetch a single PG listing and increment views', async () => {

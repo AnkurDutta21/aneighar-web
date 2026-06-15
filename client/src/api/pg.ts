@@ -22,7 +22,7 @@ export const pgApi = {
   },
 
   updateListing: async ({ id, payload }: { id: string; payload: Partial<CreatePGPayload> }) => {
-    const res = await apiClient.put(`/pg/${id}`, payload);
+    const res = await apiClient.patch(`/pg/${id}`, payload);
     return res.data;
   },
 

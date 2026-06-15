@@ -75,3 +75,22 @@ exports.logout = catchAsync(async (req, res) => {
 exports.getMe = catchAsync(async (req, res) => {
   res.status(200).json({ status: 'success', data: { user: req.user } });
 });
+
+exports.forgotPassword = catchAsync(async (req, res) => {
+  const { email } = req.body;
+  await authService.forgotPassword(email);
+  res.status(200).json({
+    status: 'success',
+    message: 'Password reset link sent to email.',
+  });
+});
+
+exports.resetPassword = catchAsync(async (req, res) => {
+  const { token } = req.params;
+  const { password } = req.body;
+  await authService.resetPassword(token, password);
+  res.status(200).json({
+    status: 'success',
+    message: 'Password reset successful.',
+  });
+});

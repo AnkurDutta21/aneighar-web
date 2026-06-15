@@ -49,10 +49,11 @@ export function useToggleSave() {
   });
 }
 
-export function useSavedListings() {
+export function useSavedListings(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['saves'],
     queryFn: () => savesApi.getSavedListings(),
+    ...options,
   });
 }
 

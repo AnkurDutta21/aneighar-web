@@ -17,6 +17,15 @@ const AMENITY_OPTIONS = [
   'laundry', 'gym', 'garden', 'cctv', 'power-backup',
 ];
 
+const RENT_INCLUDES_OPTIONS = [
+  { value: 'meals', label: '🍽 Meals' },
+  { value: 'electricity', label: '⚡ Electricity' },
+  { value: 'water', label: '💧 Water' },
+  { value: 'wifi', label: '📶 WiFi' },
+  { value: 'gas', label: '🔥 Gas' },
+  { value: 'housekeeping', label: '🧹 Housekeeping' },
+];
+
 const schema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters'),
   description: z.string().min(20, 'Description must be at least 20 characters'),
@@ -31,6 +40,8 @@ const schema = z.object({
   totalRooms: z.coerce.number().min(1, 'At least 1 room'),
   availableRooms: z.coerce.number().min(0),
   amenities: z.array(z.string()).min(1, 'Select at least one amenity'),
+  rentIncludes: z.array(z.string()).optional(),
+  additionalCharges: z.string().optional(),
 });
 type FormData = z.infer<typeof schema>;
 
@@ -39,7 +50,7 @@ const STEPS = ['Basic Info', 'Location', 'Pricing & Rooms', 'Amenities', 'Images
 const stepFields: (keyof FormData)[][] = [
   ['title', 'description'],
   ['address', 'city', 'state', 'pincode'],
-  ['rent', 'deposit', 'genderPreference', 'roomType', 'totalRooms', 'availableRooms'],
+  ['rent', 'deposit', 'genderPreference', 'roomType', 'totalRooms', 'availableRooms', 'rentIncludes', 'additionalCharges'],
   ['amenities'],
   [],
 ];
@@ -47,23 +58,23 @@ const stepFields: (keyof FormData)[][] = [
 // ─── Loading Overlay ──────────────────────────────────────────────────────────
 function LoadingOverlay({ message }: { message: string }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[hsl(222,47%,4%)]/80 backdrop-blur-sm">
-      <div className="flex flex-col items-center gap-5 rounded-2xl border border-white/10 bg-[hsl(222,47%,8%)] px-10 py-8 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm">
+      <div className="flex flex-col items-center gap-5 rounded-2xl border border-slate-100 bg-white px-10 py-8 premium-shadow">
         {/* Spinning ring */}
         <div className="relative h-16 w-16">
-          <div className="absolute inset-0 rounded-full border-4 border-white/10" />
-          <div className="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-violet-500" />
+          <div className="absolute inset-0 rounded-full border-4 border-slate-100" />
+          <div className="absolute inset-0 animate-spin rounded-full border-4 border-transparent border-t-blue-600" />
           <div className="absolute inset-2 flex items-center justify-center">
-            <Loader2 className="h-5 w-5 animate-spin text-violet-400" />
+            <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
           </div>
         </div>
         <div className="text-center">
-          <p className="font-semibold text-white">{message}</p>
-          <p className="mt-1 text-sm text-white/40">Please don't close or refresh this page</p>
+          <p className="font-bold text-slate-800">{message}</p>
+          <p className="mt-1 text-sm text-slate-500">Please don't close or refresh this page</p>
         </div>
         {/* Animated progress bar */}
-        <div className="h-1 w-48 overflow-hidden rounded-full bg-white/10">
-          <div className="h-full animate-[loading_1.5s_ease-in-out_infinite] rounded-full bg-violet-500" />
+        <div className="h-1 w-48 overflow-hidden rounded-full bg-slate-100">
+          <div className="h-full animate-[loading_1.5s_ease-in-out_infinite] rounded-full bg-blue-600" />
         </div>
       </div>
     </div>
@@ -97,13 +108,13 @@ function StepIndicator({ currentStep, maxVisited, steps, onStepClick, disabled }
                 disabled={!isClickable}
                 title={isVisited ? step : undefined}
                 className={cn(
-                  'flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-medium transition-all duration-300',
+                  'flex h-9 w-9 items-center justify-center rounded-full border-2 text-sm font-bold transition-all duration-300',
                   isCompleted
-                    ? 'border-violet-600 bg-violet-600 text-white'
+                    ? 'border-blue-600 bg-blue-600 text-white'
                     : isCurrent
-                    ? 'border-violet-500 bg-violet-500/20 text-violet-400'
-                    : 'border-white/20 bg-transparent text-white/30',
-                  isClickable && 'cursor-pointer hover:scale-110 hover:border-violet-400 hover:shadow-lg hover:shadow-violet-500/20',
+                    ? 'border-blue-500 bg-blue-50 text-blue-600 font-semibold'
+                    : 'border-slate-200 bg-transparent text-slate-400',
+                  isClickable && 'cursor-pointer hover:scale-110 hover:border-blue-400 hover:shadow-lg hover:shadow-blue-500/20',
                   !isClickable && 'cursor-default',
                 )}
               >
@@ -112,7 +123,7 @@ function StepIndicator({ currentStep, maxVisited, steps, onStepClick, disabled }
               <span
                 className={cn(
                   'mt-1 hidden text-xs sm:block transition-colors',
-                  isCurrent ? 'text-violet-300 font-medium' : isVisited ? 'text-white/60' : 'text-white/30'
+                  isCurrent ? 'text-blue-600 font-bold' : isVisited ? 'text-slate-650 font-medium' : 'text-slate-400'
                 )}
               >
                 {step}
@@ -122,7 +133,7 @@ function StepIndicator({ currentStep, maxVisited, steps, onStepClick, disabled }
               <div
                 className={cn(
                   'mx-2 mb-4 h-0.5 flex-1 transition-all duration-500',
-                  i < currentStep ? 'bg-violet-600' : 'bg-white/10'
+                  i < currentStep ? 'bg-blue-600' : 'bg-slate-200'
                 )}
               />
             )}
@@ -210,6 +221,8 @@ export function NewPGPage() {
       totalRooms: 1,
       availableRooms: 0,
       amenities: [],
+      rentIncludes: [],
+      additionalCharges: '',
     },
   });
 
@@ -230,6 +243,8 @@ export function NewPGPage() {
         totalRooms: existing.totalRooms,
         availableRooms: existing.availableRooms,
         amenities: existing.amenities,
+        rentIncludes: (existing as unknown as { rentIncludes?: string[] }).rentIncludes ?? [],
+        additionalCharges: (existing as unknown as { additionalCharges?: string }).additionalCharges ?? '',
       });
       setExistingImages(existing.images ?? []);
       setMaxVisited(STEPS.length - 1); // all steps unlocked in edit mode
@@ -282,6 +297,8 @@ export function NewPGPage() {
       totalRooms: data.totalRooms,
       availableRooms: data.availableRooms,
       amenities: data.amenities,
+      rentIncludes: data.rentIncludes ?? [],
+      additionalCharges: data.additionalCharges ?? '',
     };
 
     const uploadIfAny = async (pgId: string) => {
@@ -334,13 +351,13 @@ export function NewPGPage() {
           <button
             onClick={() => navigate(-1)}
             disabled={isSubmitting}
-            className="flex items-center gap-2 text-sm text-white/40 hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 transition-colors disabled:opacity-40 disabled:cursor-not-allowed font-medium"
           >
             <ArrowLeft className="h-4 w-4" />
             Back
           </button>
-          <span className="text-white/20">/</span>
-          <h1 className="text-xl font-bold text-white">
+          <span className="text-slate-300">/</span>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
             {isEdit ? 'Edit PG Listing' : 'Add New PG Listing'}
           </h1>
         </div>
@@ -489,6 +506,55 @@ export function NewPGPage() {
                       {...register('availableRooms')}
                     />
                   </div>
+
+                  {/* Rent Breakdown */}
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-2">What's included in the rent?</label>
+                      <Controller
+                        name="rentIncludes"
+                        control={control}
+                        render={({ field }) => (
+                          <div className="flex flex-wrap gap-2">
+                            {RENT_INCLUDES_OPTIONS.map((opt) => {
+                              const selected = (field.value ?? []).includes(opt.value);
+                              return (
+                                <button
+                                  key={opt.value}
+                                  type="button"
+                                  onClick={() => {
+                                    const current = field.value ?? [];
+                                    field.onChange(
+                                      selected
+                                        ? current.filter((v) => v !== opt.value)
+                                        : [...current, opt.value]
+                                    );
+                                  }}
+                                  className={cn(
+                                    'rounded-xl border px-3 py-1.5 text-sm font-medium transition-all duration-200 cursor-pointer',
+                                    selected
+                                      ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-350 hover:text-slate-800 hover:bg-slate-50 premium-shadow'
+                                  )}
+                                  id={`rent-includes-${opt.value}`}
+                                >
+                                  {opt.label}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+                      />
+                      <p className="mt-2 text-xs text-slate-400">Leave blank if nothing is included — tenants will see this clearly.</p>
+                    </div>
+                    <Textarea
+                      id="pg-additional-charges"
+                      label="Additional Charges (optional)"
+                      placeholder="e.g. Electricity at actuals, Water ₹200/month"
+                      rows={2}
+                      {...register('additionalCharges')}
+                    />
+                  </div>
                 </CardContent>
               </>
             )}
@@ -521,10 +587,10 @@ export function NewPGPage() {
                                 );
                               }}
                               className={cn(
-                                'rounded-xl border px-4 py-2 text-sm font-medium capitalize transition-all duration-200',
+                                'rounded-xl border px-4 py-2 text-sm font-medium capitalize transition-all duration-200 cursor-pointer',
                                 selected
-                                  ? 'border-violet-500/50 bg-violet-500/20 text-violet-300'
-                                  : 'border-white/10 bg-white/5 text-white/50 hover:border-white/20 hover:text-white'
+                                  ? 'border-blue-500 bg-blue-50 text-blue-750 font-semibold'
+                                  : 'border-slate-200 bg-white text-slate-600 hover:border-slate-350 hover:text-slate-800 hover:bg-slate-50 premium-shadow'
                               )}
                               id={`amenity-${amenity}`}
                             >
@@ -549,7 +615,7 @@ export function NewPGPage() {
                   {/* ── Existing images (edit mode only) ───────────────── */}
                   {isEdit && existingImages.length > 0 && (
                     <div>
-                      <p className="mb-3 text-sm font-medium text-white/60">Current images</p>
+                      <p className="mb-3 text-sm font-semibold text-slate-600">Current images</p>
                       <div className="grid grid-cols-3 gap-3">
                         {existingImages.map((img) => (
                           <div key={img.publicId} className="relative group">
@@ -584,17 +650,17 @@ export function NewPGPage() {
 
                   {/* Empty state for edit with no images */}
                   {isEdit && existingImages.length === 0 && (
-                    <div className="flex flex-col items-center gap-2 rounded-xl border border-white/10 bg-white/5 py-6 text-center">
-                      <ImageIcon className="h-8 w-8 text-white/20" />
-                      <p className="text-sm text-white/40">No images yet — add some below</p>
+                    <div className="flex flex-col items-center gap-2 rounded-xl border border-slate-200 bg-slate-50/50 py-6 text-center">
+                      <ImageIcon className="h-8 w-8 text-slate-350" />
+                      <p className="text-sm text-slate-500 font-medium">No images yet — add some below</p>
                     </div>
                   )}
 
                   {/* ── New image upload dropzone ───────────────────────── */}
                   <div>
-                    {isEdit && <p className="mb-3 text-sm font-medium text-white/60">Add new images</p>}
+                    {isEdit && <p className="mb-3 text-sm font-semibold text-slate-600">Add new images</p>}
                     {!isEdit && selectedFiles.length === 0 && (
-                      <div className="mb-3 flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
+                      <div className="mb-3 flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
                         <Upload className="mt-0.5 h-4 w-4 shrink-0" />
                         <p>Listings with photos get significantly more views. Add at least one image.</p>
                       </div>
@@ -602,12 +668,12 @@ export function NewPGPage() {
 
                     <label
                       htmlFor="pg-images"
-                      className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-white/20 bg-white/5 p-8 cursor-pointer hover:border-violet-500/40 hover:bg-white/8 transition-all"
+                      className="flex flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-slate-250 bg-slate-50/50 p-8 cursor-pointer hover:border-blue-500/40 hover:bg-slate-50 transition-all"
                     >
-                      <Upload className="h-8 w-8 text-white/30" />
+                      <Upload className="h-8 w-8 text-slate-400" />
                       <div className="text-center">
-                        <p className="font-medium text-white/60">Click to upload images</p>
-                        <p className="text-xs text-white/30 mt-1">PNG, JPG, WEBP · up to 10 MB · max 5 files</p>
+                        <p className="font-bold text-slate-700">Click to upload images</p>
+                        <p className="text-xs text-slate-500 mt-1">PNG, JPG, WEBP · up to 10 MB · max 5 files</p>
                       </div>
                       <input
                         id="pg-images"
@@ -643,7 +709,7 @@ export function NewPGPage() {
 
                   <Button
                     type="submit"
-                    className="w-full"
+                    className="w-full animate-pulse-glow"
                     loading={isSubmitting}
                     id="pg-submit-btn"
                   >

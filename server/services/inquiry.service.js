@@ -1,5 +1,6 @@
 const Inquiry = require('../models/Inquiry');
 const PGListing = require('../models/PGListing');
+const User = require('../models/User');
 const AppError = require('../utils/AppError');
 
 /**
@@ -19,6 +20,28 @@ exports.createInquiry = async (studentId, { pgId, message, phone }) => {
 
   // Increment inquiry analytics
   await PGListing.findByIdAndUpdate(pgId, { $inc: { 'analytics.inquiries': 1 } });
+
+  // Send inquiry notification to owner in the background
+  try {
+    const [ownerUser, studentUser] = await Promise.all([
+      User.findById(pg.owner),
+      User.findById(studentId),
+    ]);
+
+    if (ownerUser && ownerUser.email) {
+      const emailService = require('./email.service');
+      emailService.sendInquiryNotification({
+        ownerEmail: ownerUser.email,
+        ownerName: ownerUser.name,
+        studentName: studentUser ? studentUser.name : 'A student',
+        studentPhone: phone || (studentUser ? studentUser.phone : 'N/A'),
+        pgTitle: pg.title,
+        message,
+      }).catch(err => console.error('Failed to send inquiry notification email:', err));
+    }
+  } catch (err) {
+    console.error('Failed to prepare inquiry notification email:', err);
+  }
 
   return inquiry.populate(['student', 'pg']);
 };

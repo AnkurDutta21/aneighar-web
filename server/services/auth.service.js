@@ -147,3 +147,68 @@ exports.refreshToken = async (token) => {
 exports.logout = async (userId) => {
   await User.findByIdAndUpdate(userId, { refreshToken: '' });
 };
+
+/**
+ * Forgot password - generate reset token and send email
+ */
+exports.forgotPassword = async (email) => {
+  const crypto = require('crypto');
+  if (!email) throw new AppError('Please provide an email address.', 400);
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new AppError('No account found with this email.', 404);
+  }
+
+  // Generate a random reset token
+  const resetToken = crypto.randomBytes(32).toString('hex');
+
+  // Hash the token and set it to user document with expiration (1 hour)
+  const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
+  user.passwordResetToken = hashedToken;
+  user.passwordResetExpires = Date.now() + 3600000; // 1 hour
+
+  await user.save({ validateBeforeSave: false });
+
+  // Send email
+  const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
+  
+  const emailService = require('./email.service');
+  await emailService.sendPasswordResetEmail({
+    to: user.email,
+    name: user.name,
+    resetUrl,
+  });
+
+  return resetToken;
+};
+
+/**
+ * Reset password - verify token and update password
+ */
+exports.resetPassword = async (token, password) => {
+  const crypto = require('crypto');
+  if (!token) throw new AppError('Reset token is required.', 400);
+  if (!password) throw new AppError('Please provide a new password.', 400);
+
+  // Hash token
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  // Find user with matching token and valid expiry
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    throw new AppError('Reset link is invalid or has expired.', 400);
+  }
+
+  // Update password and clear reset token fields
+  user.password = password;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+
+  await user.save(); // will trigger pre('save') hash
+  return user;
+};

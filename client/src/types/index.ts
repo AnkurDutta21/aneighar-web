@@ -75,6 +75,8 @@ export interface PGListing {
   availableRooms: number;
   amenities: string[];
   images: PGImage[];
+  rentIncludes?: string[];
+  additionalCharges?: string;
   owner: User | string;
   active: boolean;
   analytics: {
@@ -113,6 +115,7 @@ export interface PGFilters {
   page?: number;
   limit?: number;
   sort?: string;
+  availableOnly?: boolean;
 }
 
 export interface CreatePGPayload {
@@ -126,6 +129,8 @@ export interface CreatePGPayload {
   totalRooms: number;
   availableRooms: number;
   amenities: string[];
+  rentIncludes?: string[];
+  additionalCharges?: string;
 }
 
 // Inquiry Types

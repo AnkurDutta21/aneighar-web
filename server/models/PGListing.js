@@ -81,6 +81,8 @@ const pgListingSchema = new mongoose.Schema(
       default: true,
     },
     rules: [{ type: String, trim: true }],
+    rentIncludes: [{ type: String, trim: true }],
+    additionalCharges: { type: String, trim: true },
     // Analytics
     analytics: {
       views: { type: Number, default: 0 },

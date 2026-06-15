@@ -13,13 +13,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="flex flex-col gap-1.5">
         {label && (
-          <label htmlFor={inputId} className="text-sm font-medium text-white/70">
+          <label htmlFor={inputId} className="text-sm font-medium text-slate-700">
             {label}
           </label>
         )}
         <div className="relative">
           {icon && (
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
               {icon}
             </span>
           )}
@@ -27,11 +27,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={cn(
-              'w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/30',
-              'focus:border-violet-500/50 focus:bg-white/8 focus:outline-none focus:ring-2 focus:ring-violet-500/20',
+              'w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400',
+              'focus:border-blue-500/60 focus:outline-none focus:ring-4 focus:ring-blue-500/10',
               'transition-all duration-200',
               icon && 'pl-10',
-              error && 'border-red-500/50 focus:ring-red-500/20',
+              error && 'border-red-500/50 focus:ring-red-500/10',
               className
             )}
             {...props}
@@ -56,7 +56,7 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     return (
       <div className="flex flex-col gap-1.5">
         {label && (
-          <label htmlFor={inputId} className="text-sm font-medium text-white/70">
+          <label htmlFor={inputId} className="text-sm font-medium text-slate-700">
             {label}
           </label>
         )}
@@ -64,10 +64,10 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            'w-full rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm text-white placeholder:text-white/30 resize-none',
-            'focus:border-violet-500/50 focus:bg-white/8 focus:outline-none focus:ring-2 focus:ring-violet-500/20',
+            'w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 resize-none',
+            'focus:border-blue-500/60 focus:outline-none focus:ring-4 focus:ring-blue-500/10',
             'transition-all duration-200',
-            error && 'border-red-500/50 focus:ring-red-500/20',
+            error && 'border-red-500/50 focus:ring-red-500/10',
             className
           )}
           {...props}
@@ -92,7 +92,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     return (
       <div className="flex flex-col gap-1.5">
         {label && (
-          <label htmlFor={inputId} className="text-sm font-medium text-white/70">
+          <label htmlFor={inputId} className="text-sm font-medium text-slate-700">
             {label}
           </label>
         )}
@@ -100,10 +100,10 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            'w-full rounded-xl border border-white/10 bg-[hsl(222,47%,9%)] px-4 py-2.5 text-sm text-white',
-            'focus:border-violet-500/50 focus:outline-none focus:ring-2 focus:ring-violet-500/20',
+            'w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900',
+            'focus:border-blue-500/60 focus:outline-none focus:ring-4 focus:ring-blue-500/10',
             'transition-all duration-200',
-            error && 'border-red-500/50',
+            error && 'border-red-500/50 focus:ring-red-500/10',
             className
           )}
           {...props}

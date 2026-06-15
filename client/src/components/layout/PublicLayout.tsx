@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/Button';
 import { cn } from '@/lib/utils';
 import { Footer } from './Footer';
-import logo from '@/assets/logo.png';
+import logo from '@/assets/logo-dark.png';
 
 export function PublicLayout() {
   const { isAuthenticated } = useAuthStore();
@@ -19,16 +19,12 @@ export function PublicLayout() {
   ];
 
   return (
-    <div className="flex min-h-screen flex-col bg-[hsl(222,47%,6%)] text-white select-none">
-      {/* Sticky Header */}
-      <header className="sticky top-0 z-50 w-full border-b border-white/8 bg-[hsl(222,47%,6%)]/75 backdrop-blur-md">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 md:px-12">
+    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 select-none">
+      <header className="sticky top-0 z-50 w-full border-b border-slate-900/[0.08] bg-white/95 backdrop-blur-[16px]">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 md:px-12">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600 shadow-lg shadow-violet-500/20">
-              <img src={logo} className="h-5 w-5 object-contain" alt="Anei Ghar Logo" />
-            </div>
-            <span className="gradient-text text-xl font-bold tracking-tight">Anei Ghar</span>
+          <Link to="/" className="flex items-center pr-6 hover:opacity-90 transition-opacity duration-200 shrink-0">
+            <img src={logo} className="h-[40px] lg:h-[48px] w-auto object-contain" alt="Anei Ghar Logo" />
           </Link>
 
           {/* Desktop Nav Links */}
@@ -40,10 +36,10 @@ export function PublicLayout() {
                   key={item.href}
                   to={item.href}
                   className={cn(
-                    'flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all duration-200',
+                    'flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-200',
                     active
-                      ? 'bg-violet-600/10 text-violet-300 shadow-sm'
-                      : 'text-white/60 hover:bg-white/5 hover:text-white'
+                      ? 'bg-blue-50 text-blue-600 shadow-sm'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   )}
                 >
                   {item.icon}
@@ -81,7 +77,7 @@ export function PublicLayout() {
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="rounded-xl p-2 text-white/60 hover:bg-white/5 hover:text-white md:hidden"
+            className="rounded-xl p-2 text-slate-500 hover:bg-slate-50 hover:text-slate-900 md:hidden"
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
@@ -90,7 +86,7 @@ export function PublicLayout() {
 
       {/* Mobile Drawer Navigation */}
       {mobileMenuOpen && (
-        <div className="fixed inset-x-0 top-16 z-40 border-b border-white/8 bg-[hsl(222,47%,7%)]/95 p-6 shadow-xl backdrop-blur-lg md:hidden animate-fade-in">
+        <div className="fixed inset-x-0 top-20 z-40 border-b border-slate-900/[0.06] bg-white/95 p-6 shadow-xl backdrop-blur-lg md:hidden animate-fade-in">
           <nav className="flex flex-col gap-2">
             {navItems.map((item) => {
               const active = location.pathname === item.href;
@@ -100,10 +96,10 @@ export function PublicLayout() {
                   to={item.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
-                    'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all',
+                    'flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition-all',
                     active
-                      ? 'bg-violet-600/20 text-violet-300'
-                      : 'text-white/60 hover:bg-white/5 hover:text-white'
+                      ? 'bg-blue-50 text-blue-600'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950'
                   )}
                 >
                   {item.icon}
@@ -111,7 +107,7 @@ export function PublicLayout() {
                 </Link>
               );
             })}
-            <div className="mt-4 border-t border-white/8 pt-4 flex flex-col gap-2">
+            <div className="mt-4 border-t border-slate-100 pt-4 flex flex-col gap-2">
               {isAuthenticated ? (
                 <Button
                   className="w-full justify-center"

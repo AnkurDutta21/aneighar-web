@@ -8,7 +8,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { useLogout } from '@/hooks/useAuth';
 import { Avatar } from '@/components/ui';
 import { cn } from '@/lib/utils';
-import logo from '@/assets/logo.png';
+import logo from '@/assets/logo-dark.png';
 
 interface NavItem {
   label: string;
@@ -50,23 +50,20 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed left-0 top-0 z-30 flex h-full w-64 flex-col border-r border-white/8 bg-[hsl(222,47%,7%)]',
+          'fixed left-0 top-0 z-30 flex h-full w-64 flex-col border-r border-slate-100 bg-white premium-shadow',
           'transition-transform duration-300 ease-in-out',
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
           'lg:translate-x-0'
         )}
       >
         {/* Logo */}
-        <div className="flex items-center justify-between border-b border-white/8 px-6 py-5">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-600 shadow-lg shadow-violet-500/20">
-              <img src={logo} className="h-5 w-5 object-contain" alt="Anei Ghar Logo" />
-            </div>
-            <span className="gradient-text text-xl font-bold">Anei Ghar</span>
+        <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+          <Link to="/" className="flex items-center hover:opacity-90 transition-opacity duration-200 shrink-0">
+            <img src={logo} className="h-[40px] w-auto object-contain" alt="Anei Ghar Logo" />
           </Link>
           <button
             onClick={toggleSidebar}
-            className="rounded-lg p-1.5 text-white/40 hover:bg-white/10 hover:text-white lg:hidden"
+            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-50 hover:text-slate-900 lg:hidden"
           >
             <X className="h-4 w-4" />
           </button>
@@ -82,15 +79,15 @@ export function Sidebar() {
                   <Link
                     to={item.href}
                     className={cn(
-                      'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
+                      'flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200',
                       active
-                        ? 'bg-violet-600/20 text-violet-300 shadow-sm'
-                        : 'text-white/50 hover:bg-white/5 hover:text-white'
+                        ? 'bg-blue-50 text-blue-600 shadow-sm'
+                        : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                     )}
                   >
                     {item.icon}
                     {item.label}
-                    {active && <ChevronRight className="ml-auto h-3 w-3 text-violet-400" />}
+                    {active && <ChevronRight className="ml-auto h-3 w-3 text-blue-500" />}
                   </Link>
                 </li>
               );
@@ -100,16 +97,16 @@ export function Sidebar() {
 
         {/* User Footer */}
         {user && (
-          <div className="border-t border-white/8 p-4">
-            <div className="flex items-center gap-3 rounded-xl p-2">
+          <div className="border-t border-slate-100 p-4">
+            <div className="flex items-center gap-3 rounded-xl p-2 bg-slate-50 border border-slate-100">
               <Avatar name={user.name} size="sm" />
               <div className="flex-1 overflow-hidden">
-                <p className="truncate text-sm font-medium text-white">{user.name}</p>
-                <p className="truncate text-xs text-white/40 capitalize">{user.role}</p>
+                <p className="truncate text-sm font-semibold text-slate-800">{user.name}</p>
+                <p className="truncate text-xs text-slate-500 capitalize">{user.role}</p>
               </div>
               <button
                 onClick={() => logout.mutate()}
-                className="rounded-lg p-1.5 text-white/40 hover:bg-red-500/10 hover:text-red-400 transition-colors"
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-red-50 hover:text-red-600 transition-colors"
                 title="Logout"
               >
                 <LogOut className="h-4 w-4" />
@@ -125,10 +122,10 @@ export function Sidebar() {
 export function Topbar() {
   const { toggleSidebar } = useUIStore();
   return (
-    <header className="flex h-16 items-center gap-4 border-b border-white/8 bg-[hsl(222,47%,6%)]/80 px-6 backdrop-blur-md">
+    <header className="flex h-16 items-center gap-4 border-b border-slate-100 bg-white/80 px-6 backdrop-blur-md">
       <button
         onClick={toggleSidebar}
-        className="rounded-xl p-2 text-white/40 hover:bg-white/10 hover:text-white transition-colors lg:hidden"
+        className="rounded-xl p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-800 transition-colors lg:hidden"
       >
         <Menu className="h-5 w-5" />
       </button>

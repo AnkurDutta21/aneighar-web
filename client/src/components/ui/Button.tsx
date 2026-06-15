@@ -10,17 +10,17 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'default', size = 'md', loading, children, disabled, ...props }, ref) => {
     const base =
-      'inline-flex items-center justify-center gap-2 rounded-xl font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]';
+      'inline-flex items-center justify-center gap-2 rounded-xl font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none active:scale-[0.98]';
 
     const variants = {
       default:
-        'bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40',
+        'bg-blue-600 hover:bg-blue-700 text-white shadow-sm hover:shadow-md transition-all duration-200',
       outline:
-        'border border-white/10 bg-white/5 hover:bg-white/10 text-white backdrop-blur-sm',
-      ghost: 'hover:bg-white/10 text-white/70 hover:text-white',
+        'border border-slate-200 bg-white hover:bg-slate-50 text-slate-700',
+      ghost: 'hover:bg-slate-100 text-slate-600 hover:text-slate-900',
       destructive:
-        'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-500/20',
-      link: 'text-violet-400 hover:text-violet-300 underline-offset-4 hover:underline',
+        'bg-red-600 hover:bg-red-700 text-white shadow-sm hover:shadow-md transition-all duration-200',
+      link: 'text-blue-600 hover:text-blue-700 underline-offset-4 hover:underline',
     };
 
     const sizes = {

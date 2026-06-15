@@ -34,24 +34,24 @@ function InquiryCard({ inquiry, isOwner }: { inquiry: Inquiry; isOwner: boolean 
   const student = typeof inquiry.student === 'object' ? inquiry.student : null;
 
   return (
-    <div className="rounded-2xl border border-white/8 bg-white/5 p-5 space-y-3 hover:border-violet-500/20 transition-all">
+    <div className="rounded-2xl border border-slate-100 bg-white p-5 space-y-3 hover:border-blue-500/20 transition-all premium-shadow">
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1">
           {isOwner && student && (
-            <p className="font-medium text-white">{student.name}</p>
+            <p className="font-bold text-slate-800">{student.name}</p>
           )}
           {pg && (
-            <p className="text-sm text-violet-400">{typeof pg === 'object' ? pg.title : ''}</p>
+            <p className="text-sm text-blue-600 font-semibold">{typeof pg === 'object' ? pg.title : ''}</p>
           )}
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {statusBadge(inquiry.status)}
         </div>
       </div>
-      <div className="rounded-xl bg-white/5 px-4 py-3 text-sm text-white/60 italic">
+      <div className="rounded-xl bg-slate-50 border border-slate-100 px-4 py-3 text-sm text-slate-600 italic font-medium">
         "{inquiry.message}"
       </div>
-      <div className="flex items-center justify-between text-xs text-white/30">
+      <div className="flex items-center justify-between text-xs text-slate-400 font-medium">
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1">
             <Phone className="h-3 w-3" /> {inquiry.phone}
@@ -106,10 +106,10 @@ export function InquiriesPage() {
     <div className="space-y-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
             {isOwner ? 'Inquiry Inbox' : 'My Inquiries'}
           </h1>
-          <p className="text-white/50">
+          <p className="text-slate-500">
             {isOwner ? 'Manage inquiries from students' : 'Track your PG inquiries'}
           </p>
         </div>
@@ -123,15 +123,15 @@ export function InquiriesPage() {
               { value: 'closed', label: 'Closed' },
             ]}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="w-40"
+            className="w-40 bg-white border border-slate-200"
           />
         )}
       </div>
 
-      <Card>
+      <Card className="premium-shadow border border-slate-100 bg-white">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-violet-400" />
+            <MessageSquare className="h-5 w-5 text-blue-600" />
             {inquiries.length} {inquiries.length === 1 ? 'Inquiry' : 'Inquiries'}
           </CardTitle>
         </CardHeader>
@@ -142,8 +142,8 @@ export function InquiriesPage() {
             </div>
           ) : inquiries.length === 0 ? (
             <div className="py-12 text-center">
-              <MessageSquare className="mx-auto mb-3 h-10 w-10 text-white/20" />
-              <p className="text-white/40">No inquiries yet</p>
+              <MessageSquare className="mx-auto mb-3 h-10 w-10 text-slate-350" />
+              <p className="text-slate-500 font-medium">No inquiries yet</p>
             </div>
           ) : (
             <div className="space-y-3">

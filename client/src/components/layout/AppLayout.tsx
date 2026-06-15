@@ -3,7 +3,7 @@ import { Sidebar, Topbar } from './Sidebar';
 
 export function AppLayout() {
   return (
-    <div className="flex h-screen overflow-hidden bg-[hsl(222,47%,6%)]">
+    <div className="flex h-screen overflow-hidden bg-slate-50">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden lg:ml-64">
         <Topbar />

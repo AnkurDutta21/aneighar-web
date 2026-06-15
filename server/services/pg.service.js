@@ -12,10 +12,18 @@ const buildFilter = (query) => {
   if (query.roomType) filter.roomType = query.roomType;
   if (query.isAvailable !== undefined) filter.isAvailable = query.isAvailable === 'true';
 
-  if (query.minPrice || query.maxPrice) {
+  // Support both minRent/maxRent (frontend) and minPrice/maxPrice (legacy)
+  const minRent = query.minRent || query.minPrice;
+  const maxRent = query.maxRent || query.maxPrice;
+  if (minRent || maxRent) {
     filter.rent = {};
-    if (query.minPrice) filter.rent.$gte = Number(query.minPrice);
-    if (query.maxPrice) filter.rent.$lte = Number(query.maxPrice);
+    if (minRent) filter.rent.$gte = Number(minRent);
+    if (maxRent) filter.rent.$lte = Number(maxRent);
+  }
+
+  // Filter to only available rooms (availableRooms > 0)
+  if (query.availableOnly === 'true') {
+    filter.availableRooms = { $gt: 0 };
   }
 
   if (query.amenities) {

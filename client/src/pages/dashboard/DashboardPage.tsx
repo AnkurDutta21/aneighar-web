@@ -21,18 +21,18 @@ function StatCard({
   color?: 'violet' | 'cyan' | 'emerald' | 'amber';
 }) {
   const colors = {
-    violet: 'bg-violet-500/10 text-violet-400',
-    cyan: 'bg-cyan-500/10 text-cyan-400',
-    emerald: 'bg-emerald-500/10 text-emerald-400',
-    amber: 'bg-amber-500/10 text-amber-400',
+    violet: 'bg-blue-50 text-blue-600 border border-blue-100',
+    cyan: 'bg-sky-50 text-sky-600 border border-sky-100',
+    emerald: 'bg-emerald-50 text-emerald-600 border border-emerald-100',
+    amber: 'bg-amber-50 text-amber-600 border border-amber-100',
   };
   return (
-    <Card glow>
+    <Card glow={false} className="premium-shadow border border-slate-100 bg-white">
       <CardContent className="pt-6">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-white/50">{label}</p>
-            <p className="mt-1 text-3xl font-bold text-white">{value}</p>
+            <p className="text-sm text-slate-500 font-semibold">{label}</p>
+            <p className="mt-1 text-3xl font-extrabold text-slate-900 tracking-tight">{value}</p>
           </div>
           <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${colors[color]}`}>
             {icon}
@@ -57,10 +57,10 @@ export function DashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">
             Welcome back, {user?.name?.split(' ')[0]} 👋
           </h1>
-          <p className="text-white/50">
+          <p className="text-slate-500">
             {isOwner ? "Here's how your PGs are performing" : "Manage your PG search"}
           </p>
         </div>
@@ -80,7 +80,7 @@ export function DashboardPage() {
           {dashLoading ? (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {Array.from({ length: 4 }).map((_, i) => (
-                <Card key={i}><CardContent className="pt-6"><Skeleton className="h-16 w-full" /></CardContent></Card>
+                <Card key={i} className="premium-shadow border border-slate-100 bg-white"><CardContent className="pt-6"><Skeleton className="h-16 w-full" /></CardContent></Card>
               ))}
             </div>
           ) : (
@@ -97,7 +97,7 @@ export function DashboardPage() {
       {/* Student stats */}
       {!isOwner && (
         <div className="grid gap-4 sm:grid-cols-3">
-          <StatCard icon={<Building2 className="h-6 w-6" />} label="Browse PGs" value="1,200+" color="violet" />
+          <StatCard icon={<Building2 className="h-6 w-6" />} label="Browse PGs" value="Explore →" color="violet" />
           <StatCard icon={<Heart className="h-6 w-6" />} label="Saved PGs" value={stats?.totalSaves ?? 0} color="cyan" />
           <StatCard icon={<MessageSquare className="h-6 w-6" />} label="My Inquiries" value={stats?.totalInquiries ?? 0} color="emerald" />
         </div>
@@ -105,7 +105,7 @@ export function DashboardPage() {
 
       {/* My Listings (Owner) */}
       {isOwner && (
-        <Card>
+        <Card className="premium-shadow border border-slate-100 bg-white">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle>My Listings</CardTitle>
@@ -121,8 +121,8 @@ export function DashboardPage() {
               </div>
             ) : listings.length === 0 ? (
               <div className="py-8 text-center">
-                <Building2 className="mx-auto mb-3 h-10 w-10 text-white/20" />
-                <p className="text-white/40">No listings yet</p>
+                <Building2 className="mx-auto mb-3 h-10 w-10 text-slate-300" />
+                <p className="text-slate-500">No listings yet</p>
                 <Link to="/dashboard/listings/new" className="mt-3 inline-block">
                   <Button size="sm">Create your first listing</Button>
                 </Link>
@@ -130,18 +130,18 @@ export function DashboardPage() {
             ) : (
               <div className="space-y-3">
                 {listings.slice(0, 5).map((pg) => (
-                  <div key={pg._id} className="flex items-center justify-between rounded-xl border border-white/8 bg-white/5 p-4">
+                  <div key={pg._id} className="flex items-center justify-between rounded-xl border border-slate-100 bg-slate-50/50 p-4 hover:bg-slate-50 transition-colors">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/20">
-                        <Building2 className="h-5 w-5 text-violet-400" />
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100">
+                        <Building2 className="h-5 w-5 text-blue-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-white">{pg.title}</p>
-                        <p className="text-sm text-white/40">{pg.location.city} · {formatCurrency(pg.rent)}/mo</p>
+                        <p className="font-bold text-slate-800">{pg.title}</p>
+                        <p className="text-sm text-slate-500 font-medium">{pg.location.city} · {formatCurrency(pg.rent)}/mo</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <div className="hidden gap-4 text-sm text-white/40 sm:flex">
+                      <div className="hidden gap-4 text-sm text-slate-400 sm:flex">
                         <span className="flex items-center gap-1"><Eye className="h-3 w-3" /> {pg.analytics?.views ?? 0}</span>
                         <span className="flex items-center gap-1"><MessageSquare className="h-3 w-3" /> {pg.analytics?.inquiries ?? 0}</span>
                       </div>
@@ -161,56 +161,56 @@ export function DashboardPage() {
       )}
 
       {/* Quick actions */}
-      <Card>
+      <Card className="premium-shadow border border-slate-100 bg-white">
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             <Link to="/pg">
-              <div className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/5 p-4 hover:border-violet-500/30 hover:bg-white/8 transition-all cursor-pointer">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-500/20 text-violet-400">
+              <div className="flex items-center gap-3 rounded-xl border border-slate-150 bg-slate-50/50 p-4 hover:border-blue-500/20 hover:bg-slate-50 hover:shadow-sm transition-all cursor-pointer">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600 border border-blue-100">
                   <BarChart3 className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="font-medium text-white">Browse PGs</p>
-                  <p className="text-xs text-white/40">Explore all listings</p>
+                  <p className="font-bold text-slate-800">Browse PGs</p>
+                  <p className="text-xs text-slate-550">Explore all listings</p>
                 </div>
               </div>
             </Link>
             <Link to="/dashboard/inquiries">
-              <div className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/5 p-4 hover:border-violet-500/30 hover:bg-white/8 transition-all cursor-pointer">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/20 text-emerald-400">
+              <div className="flex items-center gap-3 rounded-xl border border-slate-150 bg-slate-50/50 p-4 hover:border-emerald-500/20 hover:bg-slate-50 hover:shadow-sm transition-all cursor-pointer">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100">
                   <MessageSquare className="h-5 w-5" />
                 </div>
                 <div>
-                  <p className="font-medium text-white">Inquiries</p>
-                  <p className="text-xs text-white/40">{isOwner ? 'View inbox' : 'My inquiries'}</p>
+                  <p className="font-bold text-slate-800">Inquiries</p>
+                  <p className="text-xs text-slate-550">{isOwner ? 'View inbox' : 'My inquiries'}</p>
                 </div>
               </div>
             </Link>
             {!isOwner && (
               <Link to="/dashboard/saved">
-                <div className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/5 p-4 hover:border-violet-500/30 hover:bg-white/8 transition-all cursor-pointer">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-500/20 text-amber-400">
+                <div className="flex items-center gap-3 rounded-xl border border-slate-150 bg-slate-50/50 p-4 hover:border-amber-500/20 hover:bg-slate-50 hover:shadow-sm transition-all cursor-pointer">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600 border border-amber-100">
                     <Heart className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="font-medium text-white">Saved PGs</p>
-                    <p className="text-xs text-white/40">Your wishlist</p>
+                    <p className="font-bold text-slate-800">Saved PGs</p>
+                    <p className="text-xs text-slate-550">Your wishlist</p>
                   </div>
                 </div>
               </Link>
             )}
             {isOwner && (
               <Link to="/dashboard/listings/new">
-                <div className="flex items-center gap-3 rounded-xl border border-white/8 bg-white/5 p-4 hover:border-violet-500/30 hover:bg-white/8 transition-all cursor-pointer">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/20 text-cyan-400">
+                <div className="flex items-center gap-3 rounded-xl border border-slate-150 bg-slate-50/50 p-4 hover:border-sky-500/20 hover:bg-slate-50 hover:shadow-sm transition-all cursor-pointer">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-600 border border-sky-100">
                     <PlusCircle className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="font-medium text-white">Add PG</p>
-                    <p className="text-xs text-white/40">Create new listing</p>
+                    <p className="font-bold text-slate-800">Add PG</p>
+                    <p className="text-xs text-slate-550">Create new listing</p>
                   </div>
                 </div>
               </Link>

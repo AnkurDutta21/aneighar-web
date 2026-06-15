@@ -16,6 +16,7 @@ router.get('/:id', pgController.getPGById);
 // Owner-only mutation routes
 router.post('/', protect, restrictTo('owner'), pgController.createPG);
 router.put('/:id', protect, restrictTo('owner'), pgController.updatePG);
+router.patch('/:id', protect, restrictTo('owner'), pgController.updatePG);
 router.delete('/:id', protect, restrictTo('owner'), pgController.deletePG);
 router.post('/:id/images', protect, restrictTo('owner'), handleUploadErrors(upload.array('images', 10)), pgController.uploadImages);
 router.delete('/:id/images/:publicId', protect, restrictTo('owner'), pgController.deleteImage);
