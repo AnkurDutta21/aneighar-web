@@ -29,12 +29,14 @@ const sendErrorDev = (err, res) =>
 
 const sendErrorProd = (err, res) => {
   if (err.isOperational) {
+    // Log all operational errors too so they show up in Vercel Function Logs
+    console.error(`[${err.statusCode}] ${err.message}`);
     return res.status(err.statusCode).json({
       status: err.status,
       message: err.message,
     });
   }
-  // Programming/unknown error: don't leak details
+  // Programming/unknown error: don't leak details to client
   console.error('ERROR 💥', err);
   return res.status(500).json({
     status: 'error',

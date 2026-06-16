@@ -39,7 +39,7 @@ const authLimiter = rateLimit({
 
 // ─── CORS ─────────────────────────────────────────────────────────────────────
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: process.env.CLIENT_URL,
   credentials: true,
 }));
 
@@ -49,9 +49,8 @@ app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 app.use(cookieParser());
 
 // ─── Logging ──────────────────────────────────────────────────────────────────
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
-}
+// Use 'dev' format locally, 'combined' (Apache-style) in production for Vercel logs
+app.use(morgan(process.env.NODE_ENV === 'development' ? 'dev' : 'combined'));
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
