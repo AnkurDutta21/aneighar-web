@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "AneiGhar",
+    "slug": "aneighar",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "scheme": "aneighar",
+    "splash": {
+      "backgroundColor": "#2563eb"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "in.aniecorp.aneighar"
+    },
+    "android": {
+      "package": "in.aniecorp.aneighar",
+      "adaptiveIcon": {
+        "backgroundColor": "#2563eb",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "apiUrl": "https://api-ghar.aniecorp.in",
+      "firebaseProjectId": "aneighar-8455d"
+    },
+    "plugins": [
+      "expo-font"
+    ]
+  }
+}
