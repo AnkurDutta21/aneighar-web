@@ -11,6 +11,8 @@ import { Input, Textarea, Select } from '@/components/ui/Input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { ArrowLeft, ArrowRight, Upload, Check, X, Loader2, Trash2, ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { LocationPicker } from '@/components/maps/LocationPicker';
+import type { LocationResult } from '@/components/maps/LocationPicker';
 
 const AMENITY_OPTIONS = [
   'wifi', 'ac', 'parking', 'meals', 'tv', 'security',
@@ -33,6 +35,8 @@ const schema = z.object({
   city: z.string().min(2, 'City required'),
   state: z.string().min(2, 'State required'),
   pincode: z.string().length(6, 'Pincode must be 6 digits'),
+  lat: z.number().optional(),
+  lng: z.number().optional(),
   rent: z.coerce.number().min(500, 'Rent must be at least ₹500'),
   deposit: z.coerce.number().min(0, 'Deposit cannot be negative'),
   genderPreference: z.enum(['male', 'female', 'any']),
@@ -204,6 +208,8 @@ export function NewPGPage() {
     control,
     trigger,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema) as never,
@@ -214,6 +220,8 @@ export function NewPGPage() {
       city: '',
       state: '',
       pincode: '',
+      lat: undefined,
+      lng: undefined,
       rent: 0,
       deposit: 0,
       genderPreference: 'any',
@@ -236,6 +244,8 @@ export function NewPGPage() {
         city: existing.location.city,
         state: existing.location.state,
         pincode: existing.location.pincode,
+        lat: existing.location.coordinates?.lat,
+        lng: existing.location.coordinates?.lng,
         rent: existing.rent,
         deposit: existing.deposit,
         genderPreference: existing.genderPreference,
@@ -289,6 +299,7 @@ export function NewPGPage() {
         city: data.city,
         state: data.state,
         pincode: data.pincode,
+        ...(data.lat && data.lng ? { coordinates: { lat: data.lat, lng: data.lng } } : {}),
       },
       rent: data.rent,
       deposit: data.deposit,
@@ -404,38 +415,72 @@ export function NewPGPage() {
             {step === 1 && (
               <>
                 <CardHeader><CardTitle>Location Details</CardTitle></CardHeader>
-                <CardContent className="space-y-4">
-                  <Input
-                    id="pg-address"
-                    label="Street Address"
-                    placeholder="123 Main Street, near XYZ College"
-                    error={errors.address?.message}
-                    {...register('address')}
-                  />
-                  <div className="grid gap-4 sm:grid-cols-2">
-                    <Input
-                      id="pg-city"
-                      label="City"
-                      placeholder="Bangalore"
-                      error={errors.city?.message}
-                      {...register('city')}
-                    />
-                    <Input
-                      id="pg-state"
-                      label="State"
-                      placeholder="Karnataka"
-                      error={errors.state?.message}
-                      {...register('state')}
+                <CardContent className="space-y-5">
+                  {/* LocationPicker — autocomplete + GPS + Plus Code + draggable map */}
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-2">
+                      Pin Exact Location
+                    </label>
+                    <p className="mb-3 text-xs text-slate-500">
+                      Search by address, landmark, or Plus Code (e.g. <code className="rounded bg-slate-100 px-1">P473+7HW Jorhat</code>).
+                      You can also use GPS or click on the map to drop a pin.
+                    </p>
+                    <LocationPicker
+                      value={{
+                        lat: watch('lat'),
+                        lng: watch('lng'),
+                      }}
+                      onChange={(result: LocationResult) => {
+                        setValue('address', result.address, { shouldValidate: true });
+                        setValue('city', result.city, { shouldValidate: true });
+                        setValue('state', result.state, { shouldValidate: true });
+                        setValue('pincode', result.pincode, { shouldValidate: true });
+                        setValue('lat', result.lat);
+                        setValue('lng', result.lng);
+                      }}
                     />
                   </div>
-                  <Input
-                    id="pg-pincode"
-                    label="Pincode"
-                    placeholder="560001"
-                    maxLength={6}
-                    error={errors.pincode?.message}
-                    {...register('pincode')}
-                  />
+
+                  {/* Manual fallback fields — auto-filled by picker, editable */}
+                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 space-y-4">
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-wide">Auto-filled Address Fields (editable)</p>
+                    <Input
+                      id="pg-address"
+                      label="Street Address"
+                      placeholder="123 Main Street, near XYZ College"
+                      error={errors.address?.message}
+                      {...register('address')}
+                    />
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Input
+                        id="pg-city"
+                        label="City"
+                        placeholder="Bangalore"
+                        error={errors.city?.message}
+                        {...register('city')}
+                      />
+                      <Input
+                        id="pg-state"
+                        label="State"
+                        placeholder="Karnataka"
+                        error={errors.state?.message}
+                        {...register('state')}
+                      />
+                    </div>
+                    <Input
+                      id="pg-pincode"
+                      label="Pincode"
+                      placeholder="560001"
+                      maxLength={6}
+                      error={errors.pincode?.message}
+                      {...register('pincode')}
+                    />
+                    {watch('lat') && watch('lng') && (
+                      <p className="text-xs text-emerald-600 font-semibold">
+                        ✓ Coordinates saved — ({watch('lat')?.toFixed(5)}, {watch('lng')?.toFixed(5)})
+                      </p>
+                    )}
+                  </div>
                 </CardContent>
               </>
             )}

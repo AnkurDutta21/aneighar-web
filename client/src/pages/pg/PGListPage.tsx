@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   MapPin, Wifi, Wind, Car, Utensils, Tv, Shield,
-  Heart, BedDouble, SlidersHorizontal, X,
+  Heart, BedDouble, SlidersHorizontal, X, LayoutGrid, Map as MapIcon,
+  Navigation, Loader2,
 } from 'lucide-react';
 import { usePGListings } from '@/hooks/usePG';
 import { useToggleSave } from '@/hooks/useInquiry';
@@ -12,6 +13,7 @@ import { Badge } from '@/components/ui';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Input';
+import { PGMapView } from '@/components/maps/PGMapView';
 import { formatCurrency } from '@/lib/utils';
 import type { PGFilters, PGListing } from '@/types';
 
@@ -62,6 +64,14 @@ function PGCard({ pg }: { pg: PGListing }) {
           >
             <Heart className="h-4 w-4" />
           </button>
+        )}
+        {/* Map pin badge — shows when coordinates exist */}
+        {pg.location.coordinates?.lat && (
+          <div className="absolute left-3 top-3">
+            <span className="inline-flex items-center gap-1 rounded-full bg-blue-600/90 px-2 py-0.5 text-[10px] font-bold text-white backdrop-blur-sm">
+              <MapPin className="h-2.5 w-2.5" /> On Map
+            </span>
+          </div>
         )}
         {/* Gender badge */}
         <div className="absolute bottom-3 left-3">
@@ -142,6 +152,8 @@ export function PGListPage() {
   const [minRent, setMinRent] = useState('');
   const [maxRent, setMaxRent] = useState('');
   const [cityInput, setCityInput] = useState(initialCity);
+  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
+  const [gpsLoading, setGpsLoading] = useState(false);
   const { data, isLoading } = usePGListings(filters);
 
   // Sync URL city param on mount
@@ -189,22 +201,103 @@ export function PGListPage() {
     setCityInput('');
   };
 
+  // ── "Near Me" geolocation ─────────────────────────────────────────────────
+  const findNearMe = useCallback(() => {
+    if (!navigator.geolocation) return;
+    setGpsLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string;
+          let city = '';
+          if (apiKey && apiKey !== 'YOUR_GOOGLE_MAPS_API_KEY_HERE') {
+            const res = await fetch(
+              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&result_type=locality&key=${apiKey}`
+            );
+            const d = await res.json();
+            city = d.results?.[0]?.address_components?.find(
+              (c: { types: string[] }) => c.types.includes('locality')
+            )?.long_name ?? '';
+          }
+          if (!city) {
+            const res = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+              { headers: { 'Accept-Language': 'en' } }
+            );
+            const d = await res.json();
+            city = d.address?.city || d.address?.town || d.address?.village || '';
+          }
+          if (city) {
+            setCityInput(city);
+            setFilters((prev) => ({ ...prev, city, page: 1 }));
+          }
+          setViewMode('map');
+        } catch {
+          // silently fall through
+        } finally {
+          setGpsLoading(false);
+        }
+      },
+      () => setGpsLoading(false),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
+
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Browse PG Listings</h1>
           <p className="mt-1 text-slate-500">Find your perfect paying guest accommodation</p>
         </div>
-        {hasActiveFilters && (
+        <div className="flex items-center gap-2">
+          {/* Near Me button */}
           <button
-            onClick={clearFilters}
-            className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-600 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 premium-shadow"
+            id="list-near-me-btn"
+            type="button"
+            onClick={findNearMe}
+            disabled={gpsLoading}
+            className="inline-flex items-center gap-1.5 rounded-xl border border-blue-200 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-600 transition-all hover:bg-blue-100 disabled:opacity-60"
           >
-            <X className="h-3 w-3" />
-            Clear filters
+            {gpsLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Navigation className="h-3.5 w-3.5" />}
+            Near Me
           </button>
-        )}
+          {/* Map / Grid toggle */}
+          <div className="flex rounded-xl border border-slate-200 bg-white p-1 premium-shadow">
+            <button
+              id="view-grid-btn"
+              type="button"
+              onClick={() => setViewMode('grid')}
+              className={[
+                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
+                viewMode === 'grid' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700',
+              ].join(' ')}
+            >
+              <LayoutGrid className="h-3.5 w-3.5" /> Grid
+            </button>
+            <button
+              id="view-map-btn"
+              type="button"
+              onClick={() => setViewMode('map')}
+              className={[
+                'flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold transition-all',
+                viewMode === 'map' ? 'bg-blue-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-700',
+              ].join(' ')}
+            >
+              <MapIcon className="h-3.5 w-3.5" /> Map
+            </button>
+          </div>
+          {hasActiveFilters && (
+            <button
+              onClick={clearFilters}
+              className="flex items-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-600 transition-colors hover:border-red-200 hover:bg-red-50 hover:text-red-600 premium-shadow"
+            >
+              <X className="h-3 w-3" />
+              Clear filters
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Filters */}
@@ -315,15 +408,33 @@ export function PGListPage() {
           </span>{' '}
           of {data.pagination?.total ?? 0} listings
           {availableOnly && ' (available only)'}
+          {viewMode === 'map' && (
+            <span className="ml-2 inline-flex items-center gap-1 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-semibold text-blue-600">
+              <MapIcon className="h-3 w-3" /> Map view
+            </span>
+          )}
         </p>
       )}
 
-      {/* Grid */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {isLoading
-          ? Array.from({ length: 6 }).map((_, i) => <PGCardSkeleton key={i} />)
-          : data?.listings?.map((pg) => <PGCard key={pg._id} pg={pg} />)}
-      </div>
+      {/* Map View */}
+      {viewMode === 'map' && (
+        <div className="mb-6">
+          {isLoading ? (
+            <Skeleton className="h-[560px] w-full rounded-2xl" />
+          ) : (
+            <PGMapView listings={data?.listings ?? []} />
+          )}
+        </div>
+      )}
+
+      {/* Grid View */}
+      {viewMode === 'grid' && (
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {isLoading
+            ? Array.from({ length: 6 }).map((_, i) => <PGCardSkeleton key={i} />)
+            : data?.listings?.map((pg) => <PGCard key={pg._id} pg={pg} />)}
+        </div>
+      )}
 
       {/* Empty state */}
       {!isLoading && data?.listings?.length === 0 && (
@@ -338,8 +449,8 @@ export function PGListPage() {
         </div>
       )}
 
-      {/* Pagination */}
-      {data?.pagination && data.pagination.totalPages > 1 && (
+      {/* Pagination (grid view only) */}
+      {viewMode === 'grid' && data?.pagination && data.pagination.totalPages > 1 && (
         <div className="mt-8 flex justify-center gap-2">
           <Button
             variant="outline"

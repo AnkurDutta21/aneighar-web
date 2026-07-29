@@ -1,8 +1,8 @@
 import { Link, useNavigate } from 'react-router-dom';
 import {
-  Search, MapPin, Shield, Star, ArrowRight, TrendingUp,
+  Search, MapPin, Shield, Star, ArrowRight, TrendingUp, Navigation, Loader2, X,
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuthStore } from '@/stores/authStore';
 import { Button } from '@/components/ui/Button';
 import { Footer } from '@/components/layout/Footer';
@@ -18,19 +18,175 @@ const features = [
 
 const POPULAR_CITIES = ['Bangalore', 'Pune', 'Hyderabad', 'Chennai', 'Mumbai', 'Delhi'];
 
+type LocationState =
+  | { status: 'idle' }
+  | { status: 'requesting' }
+  | { status: 'resolving'; lat: number; lng: number }
+  | { status: 'ready'; city: string; area: string; lat: number; lng: number }
+  | { status: 'denied' }
+  | { status: 'error' };
+
 export function HomePage() {
   const { isAuthenticated } = useAuthStore();
   const navigate = useNavigate();
   const [citySearch, setCitySearch] = useState('');
   const [scrolled, setScrolled] = useState(false);
+  const [location, setLocation] = useState<LocationState>({ status: 'idle' });
+  const hasFetched = useRef(false);
 
+  // ── Reverse geocode coords → city + area name ─────────────────────────────
+  const reverseGeocode = useCallback(async (lat: number, lng: number) => {
+    setLocation({ status: 'resolving', lat, lng });
+    try {
+      const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string;
+      let city = '';
+      let area = '';
+
+      if (apiKey && apiKey !== 'YOUR_GOOGLE_MAPS_API_KEY_HERE') {
+        const res = await fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&result_type=locality|sublocality&key=${apiKey}`
+        );
+        const data = await res.json();
+        const comps = data.results?.[0]?.address_components ?? [];
+        city = comps.find((c: { types: string[] }) => c.types.includes('locality'))?.long_name ?? '';
+        area = comps.find((c: { types: string[] }) => c.types.includes('sublocality_level_1'))?.long_name ?? '';
+      }
+
+      // Fallback: Nominatim (no key needed)
+      if (!city) {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
+          { headers: { 'Accept-Language': 'en' } }
+        );
+        const data = await res.json();
+        city = data.address?.city || data.address?.town || data.address?.village || '';
+        area = data.address?.suburb || data.address?.neighbourhood || '';
+      }
+
+      if (city) {
+        setLocation({ status: 'ready', city, area, lat, lng });
+      } else {
+        setLocation({ status: 'ready', city: 'Your Area', area: '', lat, lng });
+      }
+    } catch {
+      setLocation({ status: 'error' });
+    }
+  }, []);
+
+  // ── Auto-request location on mount ───────────────────────────────────────
   useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 40);
-    };
+    if (hasFetched.current) return;
+    hasFetched.current = true;
+
+    if (!navigator.geolocation) return;
+
+    setLocation({ status: 'requesting' });
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        reverseGeocode(coords.latitude, coords.longitude);
+      },
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          setLocation({ status: 'denied' });
+        } else {
+          setLocation({ status: 'error' });
+        }
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, [reverseGeocode]);
+
+  // ── Navigate to nearby PGs ────────────────────────────────────────────────
+  const goToNearbyPGs = useCallback(() => {
+    if (location.status !== 'ready') return;
+    const { city, lat, lng } = location;
+    navigate(`/pg?city=${encodeURIComponent(city)}&lat=${lat}&lng=${lng}`);
+  }, [location, navigate]);
+
+  // ── Retry location ────────────────────────────────────────────────────────
+  const retryLocation = useCallback(() => {
+    if (!navigator.geolocation) return;
+    setLocation({ status: 'requesting' });
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => reverseGeocode(coords.latitude, coords.longitude),
+      (err) => setLocation({ status: err.code === err.PERMISSION_DENIED ? 'denied' : 'error' }),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, [reverseGeocode]);
+
+  // ── Scroll handler ────────────────────────────────────────────────────────
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // ── Location pill renderer ────────────────────────────────────────────────
+  const renderLocationPill = () => {
+    if (location.status === 'requesting' || location.status === 'resolving') {
+      return (
+        <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold text-white backdrop-blur-sm">
+          <Loader2 className="h-3.5 w-3.5 animate-spin text-sky-200" />
+          <span>Detecting your location…</span>
+        </div>
+      );
+    }
+
+    if (location.status === 'ready') {
+      const { city, area } = location;
+      return (
+        <button
+          id="hero-location-pill"
+          type="button"
+          onClick={goToNearbyPGs}
+          className="group inline-flex items-center gap-2.5 rounded-full border border-white/30 bg-white/15 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-all duration-200 hover:bg-white hover:text-blue-600 hover:border-white hover:shadow-lg hover:shadow-blue-900/20 active:scale-95"
+        >
+          {/* Pulsing dot */}
+          <span className="relative flex h-2.5 w-2.5 shrink-0">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-75" />
+            <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-400" />
+          </span>
+          <MapPin className="h-4 w-4 shrink-0 group-hover:text-blue-500" />
+          <span>
+            {area ? `${area}, ` : ''}<span className="font-extrabold">{city}</span>
+          </span>
+          <span className="ml-1 rounded-full bg-white/20 px-2 py-0.5 text-xs font-bold group-hover:bg-blue-100 group-hover:text-blue-700">
+            Find PGs →
+          </span>
+        </button>
+      );
+    }
+
+    if (location.status === 'denied') {
+      return (
+        <div className="inline-flex items-center gap-2 rounded-full border border-red-300/30 bg-red-500/10 px-4 py-2 text-xs text-red-200 backdrop-blur-sm">
+          <X className="h-3.5 w-3.5" />
+          <span>Location blocked — enable it in browser settings</span>
+          <button
+            onClick={retryLocation}
+            className="ml-1 underline hover:text-white transition-colors font-semibold"
+          >
+            Retry
+          </button>
+        </div>
+      );
+    }
+
+    if (location.status === 'error') {
+      return (
+        <button
+          onClick={retryLocation}
+          className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-xs font-semibold text-white/80 backdrop-blur-sm hover:bg-white/20 transition-all"
+        >
+          <Navigation className="h-3.5 w-3.5" />
+          Find PGs near me
+        </button>
+      );
+    }
+
+    // idle — geolocation not supported
+    return null;
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -105,7 +261,7 @@ export function HomePage() {
 
       {/* Hero */}
       <section className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 text-center bg-gradient-to-br from-sky-400 via-blue-500 to-blue-600 py-24">
-        {/* Ambient light overlay */}
+        {/* Ambient overlay */}
         <div className="absolute inset-0 bg-white/[0.03] backdrop-brightness-[0.98]" />
 
         {/* Hero Content */}
@@ -123,13 +279,18 @@ export function HomePage() {
             listings, compare amenities, and move in — stress-free.
           </p>
 
-          {/* City search bar centerpiece */}
+          {/* Location pill — auto-detected, click to browse nearby PGs */}
+          <div className="mb-5 flex flex-col items-center gap-2">
+            {renderLocationPill()}
+          </div>
+
+          {/* City search bar */}
           <div className="mx-auto mb-6 flex max-w-lg items-center gap-2 rounded-2xl border border-slate-100/50 bg-white p-2.5 premium-shadow">
             <Search className="ml-2.5 h-4 w-4 shrink-0 text-slate-400" />
             <input
               id="hero-city-search"
               type="text"
-              placeholder="Search PGs by city…"
+              placeholder="Or search PGs by city…"
               value={citySearch}
               onChange={(e) => setCitySearch(e.target.value)}
               onKeyDown={(e) => {

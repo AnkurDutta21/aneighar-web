@@ -6,6 +6,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { ToastContainer } from '@/components/ui/Toast';
 import { OnboardingModal } from '@/components/auth/OnboardingModal';
 import { useAuthStore } from '@/stores/authStore';
+import { GoogleMapsProvider } from '@/components/maps/GoogleMapsProvider';
 
 // Pages
 import { HomePage } from '@/pages/HomePage';
@@ -43,6 +44,7 @@ function OnboardingGate() {
 
 function App() {
   return (
+    <GoogleMapsProvider>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
@@ -87,6 +89,7 @@ function App() {
         <ToastContainer />
       </BrowserRouter>
     </QueryClientProvider>
+    </GoogleMapsProvider>
   );
 }
 

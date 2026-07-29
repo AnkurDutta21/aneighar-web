@@ -7,6 +7,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { Map, AdvancedMarker } from '@vis.gl/react-google-maps';
 import { usePGListing } from '@/hooks/usePG';
 import { useToggleSave, useCreateInquiry, useSavedListings } from '@/hooks/useInquiry';
 import { useAuthStore } from '@/stores/authStore';
@@ -185,24 +186,65 @@ export function PGDetailsPage() {
 
           {/* Location Map */}
           {pg.location.coordinates?.lat && pg.location.coordinates?.lng ? (
-            <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white premium-shadow">
-              <iframe
-                title="PG Location Map"
-                className="h-52 w-full"
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-                src={`https://www.google.com/maps?q=${pg.location.coordinates.lat},${pg.location.coordinates.lng}&z=15&output=embed`}
-              />
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${pg.location.coordinates.lat},${pg.location.coordinates.lng}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 border-t border-slate-100 bg-slate-50 py-2.5 text-xs text-slate-500 transition-colors hover:text-blue-600 font-semibold"
-              >
-                <ExternalLink className="h-3 w-3" />
-                Open in Google Maps
-              </a>
-            </div>
+            (() => {
+              const lat = pg.location.coordinates.lat;
+              const lng = pg.location.coordinates.lng;
+              const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string;
+              const mapsEnabled = apiKey && apiKey !== 'YOUR_GOOGLE_MAPS_API_KEY_HERE';
+              return (
+                <div className="rounded-2xl border border-slate-100 bg-white premium-shadow overflow-hidden">
+                   {/* Map header */}
+                  <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50 px-4 py-2.5">
+                    <MapPin className="h-4 w-4 shrink-0 text-blue-600" />
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-slate-800 truncate">{pg.location.address}</p>
+                      <p className="text-[11px] text-slate-500">{pg.location.city}, {pg.location.state} – {pg.location.pincode}</p>
+                    </div>
+                  </div>
+
+                  {/* Map */}
+                  <div className="relative" style={{ height: 320 }}>
+                    {mapsEnabled ? (
+                      <Map
+                        defaultCenter={{ lat, lng }}
+                        defaultZoom={16}
+                        mapId="pg-detail-map"
+                        mapTypeId="roadmap"
+                        gestureHandling="greedy"
+                        disableDefaultUI={true}
+                        style={{ width: '100%', height: '100%' }}
+                      >
+
+                        <AdvancedMarker
+                          position={{ lat, lng }}
+                          title={pg.title}
+                        />
+                      </Map>
+                    ) : (
+                      <iframe
+                        title="PG Location Map"
+                        style={{ width: '100%', height: '100%', border: 0 }}
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        src={`https://www.google.com/maps?q=${lat},${lng}&z=16&output=embed`}
+                      />
+                    )}
+                  </div>
+
+                  {/* Open in Google Maps footer */}
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 border-t border-slate-100 bg-slate-50 py-2.5 text-xs font-semibold text-slate-500 transition-colors hover:bg-blue-50 hover:text-blue-600"
+                  >
+                    <ExternalLink className="h-3.5 w-3.5" />
+                    Open in Google Maps
+                  </a>
+                </div>
+              );
+            })()
+
           ) : (
             <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white px-4 py-4 premium-shadow">
               <MapPin className="h-5 w-5 shrink-0 text-blue-600" />
