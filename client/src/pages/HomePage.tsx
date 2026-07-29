@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Footer } from '@/components/layout/Footer';
 import logo from '@/assets/logo.png';
 import logoDark from '@/assets/logo-dark.png';
+import { ChatbotWidget } from '@/components/chatbot/ChatbotWidget';
 
 const features = [
   { icon: <Search className="h-5 w-5" />, title: 'Smart Search', desc: 'Filter by city, rent range, gender preference, amenities and more' },
@@ -402,6 +403,7 @@ export function HomePage() {
       </section>
 
       <Footer />
+      <ChatbotWidget />
     </div>
   );
 }

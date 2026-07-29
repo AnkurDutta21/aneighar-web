@@ -7,6 +7,8 @@ import { cn } from '@/lib/utils';
 import { Footer } from './Footer';
 import logo from '@/assets/logo-dark.png';
 
+import { ChatbotWidget } from '../chatbot/ChatbotWidget';
+
 export function PublicLayout() {
   const { isAuthenticated } = useAuthStore();
   const location = useLocation();
@@ -146,6 +148,7 @@ export function PublicLayout() {
       </main>
 
       <Footer />
+      <ChatbotWidget />
     </div>
   );
 }

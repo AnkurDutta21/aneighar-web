@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import {
-  MapPin, Wifi, Wind, Car, Utensils, Tv, Shield, Heart,
+  MapPin, Wifi, Wind, Car, Utensils, Tv, Shield, Heart, Star,
   ArrowLeft, BedDouble, MessageSquare, Phone, CheckCircle2, ExternalLink,
 } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -15,6 +15,7 @@ import { useUIStore } from '@/stores/uiStore';
 import { Button } from '@/components/ui/Button';
 import { Input, Textarea } from '@/components/ui/Input';
 import { Badge, Skeleton } from '@/components/ui';
+import { ReviewSection } from '@/components/pg/ReviewSection';
 import { formatCurrency } from '@/lib/utils';
 import type { CreateInquiryPayload } from '@/types';
 
@@ -151,12 +152,18 @@ export function PGDetailsPage() {
         {/* Main Info */}
         <div className="lg:col-span-2 space-y-6">
           <div>
-            <div className="mb-3 flex flex-wrap gap-2">
+            <div className="mb-3 flex flex-wrap items-center gap-2">
               <Badge variant={pg.availableRooms > 0 ? 'success' : 'destructive'}>
                 {pg.availableRooms > 0 ? `${pg.availableRooms} rooms available` : 'No rooms available'}
               </Badge>
               <Badge variant="default">{pg.roomType} room</Badge>
               <Badge variant="outline">{pg.genderPreference === 'any' ? 'Co-ed' : pg.genderPreference === 'male' ? 'Males only' : 'Females only'}</Badge>
+              {Boolean(pg.ratingAverage) && (
+                <div className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-bold text-amber-700 shadow-sm">
+                  <Star className="h-3.5 w-3.5 fill-current text-amber-400" />
+                  {pg.ratingAverage} ({pg.numReviews ?? 0} review{pg.numReviews !== 1 ? 's' : ''})
+                </div>
+              )}
             </div>
             <h1 className="text-4xl font-extrabold text-slate-900 mb-2 tracking-tight">{pg.title}</h1>
             <div className="flex items-center gap-2 text-slate-500 font-medium">
@@ -254,6 +261,9 @@ export function PGDetailsPage() {
               </div>
             </div>
           )}
+
+          {/* Student Reviews & Ratings */}
+          <ReviewSection pgId={id!} />
         </div>
 
         {/* Sidebar */}

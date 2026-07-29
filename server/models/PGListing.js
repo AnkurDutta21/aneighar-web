@@ -83,6 +83,18 @@ const pgListingSchema = new mongoose.Schema(
     rules: [{ type: String, trim: true }],
     rentIncludes: [{ type: String, trim: true }],
     additionalCharges: { type: String, trim: true },
+    // Ratings
+    ratingAverage: {
+      type: Number,
+      default: 0,
+      min: [0, 'Rating cannot be below 0'],
+      max: [5, 'Rating cannot be above 5'],
+      set: (val) => Math.round(val * 10) / 10,
+    },
+    numReviews: {
+      type: Number,
+      default: 0,
+    },
     // Analytics
     analytics: {
       views: { type: Number, default: 0 },

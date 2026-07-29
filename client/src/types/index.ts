@@ -77,6 +77,8 @@ export interface PGListing {
   images: PGImage[];
   rentIncludes?: string[];
   additionalCharges?: string;
+  ratingAverage?: number;
+  numReviews?: number;
   owner: User | string;
   active: boolean;
   analytics: {
@@ -86,6 +88,54 @@ export interface PGListing {
   };
   createdAt: string;
   updatedAt: string;
+}
+
+// Review Types
+export interface Review {
+  _id: string;
+  pg: string;
+  user: {
+    _id: string;
+    name: string;
+    avatar?: string;
+  };
+  rating: number;
+  comment: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ReviewsResponse {
+  status: string;
+  data: {
+    reviews: Review[];
+    total: number;
+    page: number;
+    totalPages: number;
+    ratingDistribution: Record<number, number>;
+  };
+}
+
+export interface CreateReviewPayload {
+  rating: number;
+  comment: string;
+}
+
+// Chatbot Types
+export interface ChatbotMessage {
+  id: string;
+  sender: 'user' | 'bot';
+  text: string;
+  recommendations?: PGListing[];
+  timestamp: Date;
+}
+
+export interface ChatbotResponse {
+  status: string;
+  data: {
+    reply: string;
+    recommendations: PGListing[];
+  };
 }
 
 export interface PGListingsResponse {

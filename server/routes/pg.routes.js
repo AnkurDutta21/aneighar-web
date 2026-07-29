@@ -4,6 +4,11 @@ const pgController = require('../controllers/pg.controller');
 const { protect, restrictTo } = require('../middleware/auth');
 const { upload, handleUploadErrors } = require('../middleware/upload');
 
+const reviewRoutes = require('./review.routes');
+
+// Re-route into review router
+router.use('/:pgId/reviews', reviewRoutes);
+
 // Public routes
 router.get('/', pgController.getAllPGs);
 

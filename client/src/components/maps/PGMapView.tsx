@@ -9,7 +9,7 @@ import {
   InfoWindow,
   useAdvancedMarkerRef,
 } from '@vis.gl/react-google-maps';
-import { MapPin, BedDouble } from 'lucide-react';
+import { MapPin, BedDouble, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { formatCurrency } from '@/lib/utils';
 import type { PGListing } from '@/types';
@@ -50,6 +50,11 @@ function PGMarker({ pg, isSelected, onClick }: MarkerWithInfoProps) {
         >
           <MapPin className="h-3 w-3" />
           {formatCurrency(pg.rent)}
+          {Boolean(pg.ratingAverage) && (
+            <span className="ml-1 inline-flex items-center text-[10px] text-amber-500">
+              ★{pg.ratingAverage}
+            </span>
+          )}
         </div>
       </AdvancedMarker>
 
@@ -69,7 +74,15 @@ function PGMarker({ pg, isSelected, onClick }: MarkerWithInfoProps) {
               </div>
             )}
             {/* Info */}
-            <p className="font-bold text-slate-800 text-sm leading-tight line-clamp-2">{pg.title}</p>
+            <div className="flex items-start justify-between gap-1">
+              <p className="font-bold text-slate-800 text-sm leading-tight line-clamp-2">{pg.title}</p>
+              {Boolean(pg.ratingAverage) && (
+                <span className="inline-flex items-center gap-0.5 rounded-full bg-amber-50 border border-amber-200 px-1.5 py-0.5 text-[10px] font-bold text-amber-700 shrink-0">
+                  <Star className="h-2.5 w-2.5 fill-current text-amber-400" />
+                  {pg.ratingAverage}
+                </span>
+              )}
+            </div>
             <p className="mt-1 text-xs text-slate-500 flex items-center gap-1">
               <MapPin className="h-3 w-3 shrink-0" />
               {pg.location.address}, {pg.location.city}

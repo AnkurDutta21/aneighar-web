@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
-  MapPin, Wifi, Wind, Car, Utensils, Tv, Shield,
+  MapPin, Wifi, Wind, Car, Utensils, Tv, Shield, Star,
   Heart, BedDouble, SlidersHorizontal, X, LayoutGrid, Map as MapIcon,
   Navigation, Loader2,
 } from 'lucide-react';
@@ -73,11 +73,17 @@ function PGCard({ pg }: { pg: PGListing }) {
             </span>
           </div>
         )}
-        {/* Gender badge */}
-        <div className="absolute bottom-3 left-3">
+        {/* Gender badge & Rating */}
+        <div className="absolute bottom-3 left-3 flex items-center gap-1.5">
           <Badge variant={pg.genderPreference === 'female' ? 'success' : pg.genderPreference === 'male' ? 'default' : 'outline'}>
             {pg.genderPreference === 'any' ? '👥 Co-ed' : pg.genderPreference === 'male' ? '♂ Males' : '♀ Females'}
           </Badge>
+          {Boolean(pg.ratingAverage) && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-white/95 backdrop-blur-sm px-2 py-0.5 text-[11px] font-extrabold text-amber-700 shadow-sm border border-amber-200">
+              <Star className="h-3 w-3 fill-current text-amber-400" />
+              {pg.ratingAverage}
+            </span>
+          )}
         </div>
         <div className="absolute bottom-3 right-3">
           <Badge variant={pg.availableRooms > 0 ? 'success' : 'destructive'}>
