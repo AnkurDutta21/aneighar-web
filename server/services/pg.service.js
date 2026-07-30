@@ -1,8 +1,25 @@
 const PGListing = require('../models/PGListing');
 const AppError = require('../utils/AppError');
 
+// ── Haversine formula ─────────────────────────────────────────────────────────
+// Returns distance in km between two lat/lng points
+const haversineKm = (lat1, lng1, lat2, lng2) => {
+  const R = 6371; // Earth radius in km
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLng = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos((lat1 * Math.PI) / 180) *
+      Math.cos((lat2 * Math.PI) / 180) *
+      Math.sin(dLng / 2) *
+      Math.sin(dLng / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
+
 /**
- * Build a MongoDB filter object from query params
+ * Build a MongoDB filter object from query params.
+ * Note: lat/lng/radius are handled separately in getAllPGs via bounding box +
+ * Haversine post-filter, not inside this function.
  */
 const buildFilter = (query) => {
   const filter = {};
@@ -37,7 +54,8 @@ const buildFilter = (query) => {
 };
 
 /**
- * Get all PG listings with filtering, sorting, and pagination
+ * Get all PG listings with filtering, sorting, and pagination.
+ * Supports proximity search via lat/lng/radius query params (Haversine).
  */
 exports.getAllPGs = async (query) => {
   const page = Math.max(1, parseInt(query.page) || 1);
@@ -57,6 +75,61 @@ exports.getAllPGs = async (query) => {
 
   const filter = buildFilter(query);
 
+  // ── Proximity filter (lat/lng/radius) ──────────────────────────────────────
+  const hasProximity =
+    query.lat && query.lng && !isNaN(Number(query.lat)) && !isNaN(Number(query.lng));
+
+  if (hasProximity) {
+    const centerLat = Number(query.lat);
+    const centerLng = Number(query.lng);
+    const radiusKm = Math.min(Number(query.radius) || 3, 50); // cap at 50 km
+
+    // 1° of latitude ≈ 111 km; 1° of longitude ≈ 111 * cos(lat) km
+    const latDelta = radiusKm / 111;
+    const lngDelta = radiusKm / (111 * Math.cos((centerLat * Math.PI) / 180));
+
+    // Step 1: Fast bounding-box pre-filter to reduce DB scan
+    filter['location.coordinates.lat'] = {
+      $gte: centerLat - latDelta,
+      $lte: centerLat + latDelta,
+    };
+    filter['location.coordinates.lng'] = {
+      $gte: centerLng - lngDelta,
+      $lte: centerLng + lngDelta,
+    };
+
+    // Step 2: Fetch bounding-box candidates (no pagination yet)
+    const candidates = await PGListing.find(filter)
+      .sort(sort)
+      .populate('owner', 'name email phone avatar')
+      .lean();
+
+    // Step 3: Exact Haversine post-filter
+    const nearby = candidates.filter((pg) => {
+      const { lat, lng } = pg.location?.coordinates || {};
+      if (lat == null || lng == null) return false;
+      return haversineKm(centerLat, centerLng, lat, lng) <= radiusKm;
+    });
+
+    // Step 4: Manual pagination on filtered results
+    const total = nearby.length;
+    const paginated = nearby.slice(skip, skip + limit);
+
+    return {
+      listings: paginated,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit) || 1,
+        hasNextPage: page * limit < total,
+        hasPrevPage: page > 1,
+      },
+    };
+  }
+  // ─────────────────────────────────────────────────────────────────────────
+
+  // Standard path (no proximity)
   const [listings, total] = await Promise.all([
     PGListing.find(filter)
       .sort(sort)

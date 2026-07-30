@@ -116,6 +116,7 @@ pgListingSchema.index({ genderPreference: 1 });
 pgListingSchema.index({ isAvailable: 1 });
 pgListingSchema.index({ owner: 1 });
 pgListingSchema.index({ 'location.city': 1, rent: 1, genderPreference: 1 });
+pgListingSchema.index({ 'location.coordinates.lat': 1, 'location.coordinates.lng': 1 }); // proximity queries
 
 // Soft delete filter — async hooks use the returned Promise; no `next` needed
 pgListingSchema.pre(/^find/, function () {

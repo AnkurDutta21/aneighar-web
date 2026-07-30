@@ -1,9 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import {
   MapPin, Wifi, Wind, Car, Utensils, Tv, Shield, Star,
   Heart, BedDouble, SlidersHorizontal, X, LayoutGrid, Map as MapIcon,
-  Navigation, Loader2,
+  Navigation, Loader2, GraduationCap,
 } from 'lucide-react';
 import { usePGListings } from '@/hooks/usePG';
 import { useToggleSave } from '@/hooks/useInquiry';
@@ -151,9 +151,23 @@ function PGCardSkeleton() {
 
 export function PGListPage() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const initialCity = searchParams.get('city') || '';
+  const initialLat = searchParams.get('lat') ? Number(searchParams.get('lat')) : undefined;
+  const initialLng = searchParams.get('lng') ? Number(searchParams.get('lng')) : undefined;
+  const initialRadius = searchParams.get('radius') ? Number(searchParams.get('radius')) : undefined;
+  const initialCollege = searchParams.get('college') || '';
 
-  const [filters, setFilters] = useState<PGFilters>({ page: 1, limit: 12, city: initialCity || undefined, availableOnly: true });
+  const [filters, setFilters] = useState<PGFilters>({
+    page: 1,
+    limit: 12,
+    city: initialCity || undefined,
+    availableOnly: true,
+    lat: initialLat,
+    lng: initialLng,
+    radius: initialRadius || (initialLat ? 3 : undefined),
+  });
+  const [activeCollege, setActiveCollege] = useState(initialCollege);
   const [availableOnly, setAvailableOnly] = useState(true);
   const [minRent, setMinRent] = useState('');
   const [maxRent, setMaxRent] = useState('');
@@ -162,10 +176,17 @@ export function PGListPage() {
   const [gpsLoading, setGpsLoading] = useState(false);
   const { data, isLoading } = usePGListings(filters);
 
-  // Sync URL city param on mount
   useEffect(() => {
     if (initialCity) {
       setFilters((prev) => ({ ...prev, city: initialCity }));
+    }
+    if (initialLat && initialLng) {
+      setFilters((prev) => ({
+        ...prev,
+        lat: initialLat,
+        lng: initialLng,
+        radius: initialRadius || 3,
+      }));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -197,7 +218,7 @@ export function PGListPage() {
   };
 
   const hasActiveFilters = !!filters.city || !!filters.genderPreference || !!filters.roomType
-    || !!filters.minRent || !!filters.maxRent || !availableOnly;
+    || !!filters.minRent || !!filters.maxRent || !availableOnly || !!filters.lat;
 
   const clearFilters = () => {
     setFilters({ page: 1, limit: 12 });
@@ -205,6 +226,8 @@ export function PGListPage() {
     setMinRent('');
     setMaxRent('');
     setCityInput('');
+    setActiveCollege('');
+    navigate('/pg', { replace: true });
   };
 
   // ── "Near Me" geolocation ─────────────────────────────────────────────────
@@ -305,6 +328,25 @@ export function PGListPage() {
           )}
         </div>
       </div>
+
+      {/* College proximity banner */}
+      {activeCollege && (
+        <div className="mb-4 flex items-center gap-3 rounded-2xl border border-blue-100 bg-blue-50 px-5 py-3 premium-shadow">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
+            <GraduationCap className="h-5 w-5" />
+          </span>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-blue-800 truncate">{activeCollege}</p>
+            <p className="text-xs text-blue-500 font-medium">Showing PGs within {filters.radius ?? 3} km radius</p>
+          </div>
+          <button
+            onClick={clearFilters}
+            className="ml-auto shrink-0 rounded-lg border border-blue-200 bg-white px-3 py-1.5 text-xs font-semibold text-blue-600 hover:bg-blue-600 hover:text-white transition-all"
+          >
+            Clear
+          </button>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="mb-6 space-y-3">

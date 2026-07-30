@@ -166,6 +166,10 @@ export interface PGFilters {
   limit?: number;
   sort?: string;
   availableOnly?: boolean;
+  lat?: number;
+  lng?: number;
+  radius?: number;   // km
+  college?: string;  // display label
 }
 
 export interface CreatePGPayload {

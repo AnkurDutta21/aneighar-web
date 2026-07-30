@@ -17,7 +17,32 @@ const features = [
   { icon: <Star className="h-5 w-5" />, title: 'Detailed Listings', desc: 'Photos, amenities, pricing, and availability in one place' },
 ];
 
-const POPULAR_CITIES = ['Bangalore', 'Pune', 'Hyderabad', 'Chennai', 'Mumbai', 'Delhi'];
+const POPULAR_COLLEGES = [
+  {
+    name: 'Kaziranga University',
+    short: 'Kaziranga Univ.',
+    lat: 26.7499,
+    lng: 94.2108,
+  },
+  {
+    name: 'Jagannath Barooah University',
+    short: 'JB University',
+    lat: 26.7472,
+    lng: 94.2031,
+  },
+  {
+    name: 'Jorhat Medical College',
+    short: 'JMCH',
+    lat: 26.7580,
+    lng: 94.2097,
+  },
+  {
+    name: 'Assam Agricultural University',
+    short: 'AAU Jorhat',
+    lat: 26.7516,
+    lng: 94.2136,
+  },
+];
 
 type LocationState =
   | { status: 'idle' }
@@ -311,15 +336,23 @@ export function HomePage() {
             </Button>
           </div>
 
-          {/* Popular cities */}
+          {/* Popular colleges */}
           <div className="mb-10 flex flex-wrap justify-center gap-2">
-            {POPULAR_CITIES.map((city) => (
+            <span className="w-full text-center text-[11px] font-semibold uppercase tracking-widest text-white/50 mb-1">
+              🎓 Browse PGs near colleges
+            </span>
+            {POPULAR_COLLEGES.map((college) => (
               <button
-                key={city}
-                onClick={() => navigate(`/pg?city=${encodeURIComponent(city)}`)}
-                className="rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white transition-all hover:bg-white hover:text-blue-600 hover:border-white shadow-sm"
+                key={college.name}
+                onClick={() =>
+                  navigate(
+                    `/pg?lat=${college.lat}&lng=${college.lng}&radius=3&college=${encodeURIComponent(college.name)}`
+                  )
+                }
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3.5 py-1.5 text-xs font-semibold text-white transition-all hover:bg-white hover:text-blue-600 hover:border-white shadow-sm active:scale-95"
+                id={`college-btn-${college.name.replace(/\s+/g, '-').toLowerCase()}`}
               >
-                {city}
+                <span className="text-sky-300">📍</span>{college.short}
               </button>
             ))}
           </div>
